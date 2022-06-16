@@ -1,0 +1,45 @@
+Package: TRIPOD
+Title: Detecting Transcriptional Regulatory Relationships in Single-Cell RNA and Chromatin Accessibility Multiomic Data
+Version: 0.0.1
+Authors@R: c(
+    person(given = "Yuriko",
+           family = "Harigaya",
+           role = c("aut", "cre"),
+           email = "harigaya@email.unc.edu"),
+    person(given = "Nancy",
+           family = "Zhang",
+           role = "aut"),
+    person(given = "Yuchao",
+           family = "Jiang",
+           role = "aut"))
+Description: TRIPOD is a statistical framework for detecting three-way regulatory relationships between a cis-regulatory region, a TF, and a target gene, which we call a "trio," using single-cell ATAC/RNA multiomic data. The main functionality of this package is to infer trio regulatory relationships using robust nonparametric models. The package is augmented by two related functionalities, which are to build RNA prediction models from ATAC-seq data and to identify cell-types in which a trio regulatory relationship is active by estimating the influence of a data point in linear regression.
+License: GPL-2
+Encoding: UTF-8
+LazyData: true
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.1.2
+Depends: 
+    R (>= 2.10)
+Suggests: 
+    rmarkdown,
+    knitr
+VignetteBuilder: knitr
+Imports: 
+    GenomicRanges,
+    BiocParallel,
+    ggplot2,
+    graphics,
+    grDevices,
+    Matrix,
+    methods,
+    stats,
+    Seurat,
+    Signac,
+    nbpMatching,
+    glmnet,
+    olsrr,
+    dendextend,
+    FNN,
+    patchwork,
+    dplyr,
+    stringr
