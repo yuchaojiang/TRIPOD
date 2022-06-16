@@ -1,0 +1,634 @@
+---
+title: "TRIPOD - 10x Genomics PBMC 10k"
+author: "Yuriko Harigaya, Nancy R. Zhang, Yuchao Jiang"
+date: "`r format(Sys.Date())`"
+output:
+    html_document:
+        highlight: pygments
+        toc: true
+vignette: >
+  %\VignetteIndexEntry{TRIPOD}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+# 1 Introduction
+
+TRIPOD is a statistical framework for detecting three-way regulatory relationships
+between a *cis*-regulatory chromosomal region, a transcription factor (TF), 
+and a target gene, which we call a "trio,"
+using single-cell ATAC/RNA multiomic data. 
+This approach can complement commonly used methods
+based on pair-wise associations between
+two of the three elements (e.g., a TF and a target gene).
+The main functionality of this package is:
+
+* Infers trio regulatory relationships using robust nonparametric models
+
+The package is augmented by the following two related functionalities:
+
+* Builds RNA prediction models from ATAC-seq data
+* Identifies cell-types in which a trio regulatory relationship is active 
+by estimating the influence of a data point in linear regression
+
+Here, we demonstrate the use of TRIPOD to study epigenetic control of 
+gene expression using sigle-cell multiomic data, which is publicly available from 
+[10x Genomics](https://support.10xgenomics.com/single-cell-multiome-atac-gex/datasets). 
+The data was generated in 11909 cells of human peripheral blood mononuclear cells (PBMCs) 
+and contains ATAC-seq and RNA-seq read counts for 108377 ATAC peaks 
+and 36601 gene regions, respectively.
+Note that multiomic data generated via other protocols can be analyzed using this package.
+
+# 2 Key features of the TRIPOD method
+
+In the TRIPOD method, for a given gene, $g$,
+we consider a set of ATAC peaks near the 
+transcription start site (TSS), which are candidate *cis*-regulatory elements.
+In most cases, we include peaks 100 to 200 Kb up and downstream from TSS.
+We also consider RNA expression levels of a set of TFs 
+whose binding motifs are present in any of the peaks.
+
+For a given trio consisting of the gene $g$, the peak $t$, and the TF $j$, 
+TRIPOD characterizes the target gene expression (denoted as $Y_g$) 
+as a function of the chromatin accessibility in the peak region (denoted as $X_t$)
+and the TF (denoted as $Y_j$) expression.
+The $X_t$ variables are extracted from the ATAC-seq data,
+whereas the $Y_g$ and $Y_j$ variables are extracted from the RNA-seq data.
+
+Additionally, TRIPOD has the following features.
+
+* Use a matching-based, nonparametric approach to account for 
+potentially nonlinear relationships between the variables
+* Use a two-level testing framework to allow for multiple levels of stringency
+* Construct metacells by aggregating information across similar cells 
+to mitigate the issues of the sparsity and noisiness of single cell data
+
+# 3 Required packages
+
+The TRIPOD package is available from [GitHub](https://github.com/yharigaya/TRIPOD).
+
+```{r install, eval = TRUE, message = FALSE, warning = FALSE, results = FALSE}
+if (!requireNamespace("devtools", quietly = TRUE)) install.packages("devtools")
+devtools::install_github("yharigaya/TRIPOD/package")
+```
+
+```{r setup, eval = TRUE, message = FALSE}
+library(TRIPOD)
+```
+
+Additionally, the following packages are required to run this vignette.
+
+```{r packages, cache = FALSE, message = FALSE}
+library(Seurat)
+library(Signac)
+library(GenomicRanges)
+library(dplyr)
+library(ggplot2)
+library(EnsDb.Mmusculus.v79)
+library(GenomeInfoDb)
+library(patchwork)
+library(BiocParallel)
+```
+
+# 4 Detecting candidate trio regulatory relationships
+
+In this section, we demonstrate how to screen for trio regulatory relationships
+using data objects that have been preprocessed from the multiomics data and
+included in the TRIPOD package.
+The preprocessing is described in [the accompanying preprocessing vignette](http://htmlpreview.github.io/?https://github.com/yharigaya/TRIPOD/blob/main/vignettes/preprocessing_pbmc.html).
+
+The following code attaches objects that are necessary for analyzing the PBMC data.
+
+```{r, eval = FALSE}
+data(pbmc.transcripts.gr)
+data(pbmc.peaks.gr)
+data(pbmc.motifxTF)
+data(pbmc.peakxmotif)
+data(pbmc.metacell.rna)
+data(pbmc.metacell.peak)
+data(pbmc.metacell.celltype)
+data(pbmc.metacell.celltype.col)
+```
+
+## 4.1 Fitting models
+
+Although we typically run model fitting for over 1000 target genes,
+in this vignette, we fit models for two examples genes, *CCR7* and *GNLY*
+for demonstration purposes.
+
+```{r, eval = TRUE}
+genes <- c("CCR7", "GNLY")
+```
+
+We set the size of the window around transcription start sites (TSS) to 100 kb.
+For a given gene, ATAC peaks within the windows are considered as possible 
+*cis*-regulatory regions.
+
+```{r, eval = TRUE}
+ext.upstream <- ext.downstream <- 1e5
+```
+
+We first invoke the `getXYMatrices()` function.
+For a given gene, the function returns a list containing a set of 
+$Y_g$, $X_t$, and $Y_j$, which we call a `xymats` list.
+Here, we obtain a list of `xymats` objects for the two genes.
+
+```{r, eval = TRUE}
+xymats.list <- bplapply(
+  genes,
+  getXYMatrices,
+  ext.upstream = ext.upstream,
+  transcripts.gr = pbmc.transcripts.gr,
+  peaks.gr = pbmc.peaks.gr,
+  metacell.rna = pbmc.metacell.rna,
+  metacell.peak = pbmc.metacell.peak,
+  peakxmotif = pbmc.peakxmotif,
+  motifxTF = pbmc.motifxTF,
+  metacell.celltype = pbmc.metacell.celltype,
+  metacell.celltype.col = pbmc.metacell.celltype.col
+)
+names(xymats.list) <- genes
+```
+
+We then run TRIPOD using the following code. Note that TRIPOD can be run matching
+either chromatin accessibility, $X_t$, or TF expression, $Y_j$.
+In either case, two tests with different stringency are performed
+(level 1 and level 2).
+See [our manuscript](https://www.biorxiv.org/content/10.1101/2021.09.22.461437v1)
+for details.
+
+```{r, eval = TRUE, message = FALSE, warning = FALSE}
+# run TRIPOD matching Xt
+xymats.tripod.Xt.list <- bplapply(
+	xymats.list,
+	fitModel,
+	model.name = "TRIPOD",
+	match.by = "Xt"
+)
+names(xymats.tripod.Xt.list) <- genes
+# run TRIPOD matching Yj
+xymats.tripod.Yj.list <- bplapply(
+	xymats.list,
+	fitModel,
+	model.name = "TRIPOD",
+	match.by = "Yj"
+)
+names(xymats.tripod.Yj.list) <- genes
+```
+
+## 4.2 Getting lists of hits
+
+Next, we select hits by Benjamini-Hochberg (BH) method with a certain FDR threshold.
+We typically use a threshold of 0.01 and focus on hits with significantly
+positive coefficients.
+
+```{r, eval = TRUE}
+# set FDR < 0.01
+fdr.thresh <- 0.01
+
+# focus on positive sign
+sign <- "positive"
+```
+
+The `getTrios()` function returns a data frame with columns containing 
+the target gene name, peak number, TF number, peak name, TF name, 
+estimates of the coefficient, nominal $p$-value, and BH-adjusted $p$-value. 
+Here, for brevity, we only show the code for TRIPOD level 1 and level 2
+matching $X_t$.
+
+```{r, eval = TRUE}
+# TRIPOD level 1 matching Xt
+xymats.tX1.pos.df <- getTrios(
+	xymats.list = xymats.tripod.Xt.list,
+	fdr.thresh = fdr.thresh,
+	sign = sign,
+  model.name = "TRIPOD",
+	level = 1
+)
+head(xymats.tX1.pos.df[order(xymats.tX1.pos.df$adj), ])
+```
+
+```{r, eval = TRUE}
+# TRIPOD level 2 matching Xt
+xymats.tX2.pos.df <- getTrios(
+	xymats.list = xymats.tripod.Xt.list,
+	fdr.thresh = fdr.thresh,
+	sign = sign,
+  model.name = "TRIPOD",
+	level = 2
+)
+head(xymats.tX2.pos.df[order(xymats.tX2.pos.df$adj), ])
+```
+
+The hits from the four variations of TRIPOD (level 1 test matching $X_t$,
+level 2 test matching $X_t$, level 1 test matching $Y_j$,
+level 2 test matching $Y_j$) can be used separately 
+in downstream analyses.
+Alternatively or additionally, the union set can be used.
+
+## 4.3 Visualizaing the results
+
+We recommend visually inspecting the trio hits by generating scatter plots.
+In this section, we demonstrate data visualization focusing on
+the putative regulation of the *GNLY* gene by the TBX21 TF
+via the peak chr2−85693711−85699520.
+
+```{r, eval = TRUE}
+gene.name <- "GNLY"
+TF.name <- "TBX21"
+peak.name <- "chr2-85693711-85699520"
+```
+
+First, we extract a `xymats` object for the target gene *GNLY*
+from the `xymats.list` we have created.
+
+```{r, eval = TRUE}
+xymats <- xymats.list[[gene.name]]
+```
+
+We then invoke the `plotTFPeakGeneScatter()` function to generate scatter plots
+comparing $Y_g$, $X_t$, and $Y_j$ values for meta-cells.
+
+```{r, eval = TRUE, fig.width = 9, fig.height = 3, fig.align = "center", message = FALSE, warning = FALSE}
+par(pty = "s", mgp = c(2, 0.8, 0), mar = c(3, 3, 3, 1), mfrow = c(1, 3))
+plotGenePeakTFScatter(
+	xymats = xymats, peak.name = peak.name, TF.name = TF.name,
+  to.plot = "marginal.Yg.Xt",
+	cap.at.quantile = 0.02,
+	metacell.celltype = pbmc.metacell.celltype,
+	metacell.celltype.col = pbmc.metacell.celltype.col
+)
+
+plotGenePeakTFScatter(
+	xymats = xymats, peak.name = peak.name, TF.name = TF.name,
+  to.plot = "marginal.Yg.Yj",
+	cap.at.quantile = 0.02,
+	metacell.celltype = pbmc.metacell.celltype,
+	metacell.celltype.col = pbmc.metacell.celltype.col
+)
+
+plotGenePeakTFScatter(
+	xymats = xymats, peak.name = peak.name, TF.name = TF.name,
+  to.plot = "marginal.Yj.Xt",
+	cap.at.quantile = 0.02,
+	metacell.celltype = pbmc.metacell.celltype,
+	metacell.celltype.col = pbmc.metacell.celltype.col
+)
+```
+
+The following code visualizes pairs of meta-cells, which are used in the TRIPOD models.
+
+```{r, eval = TRUE, fig.width = 6, fig.height = 6, fig.align = "center", message = FALSE, warning = FALSE}
+par(pty = "s", mgp = c(2, 0.8, 0), mar = c(3, 3, 3, 1), mfrow = c(2, 2))
+plotGenePeakTFScatter(
+	xymats = xymats, peak.name = peak.name, TF.name = TF.name,
+  to.plot = "TRIPOD",
+	match.by = "Xt",
+	level = 1,
+	cap.at.quantile = 0.02,
+	metacell.celltype = pbmc.metacell.celltype,
+	metacell.celltype.col = pbmc.metacell.celltype.col
+)
+
+plotGenePeakTFScatter(
+	xymats = xymats, peak.name = peak.name, TF.name = TF.name,
+  to.plot = "TRIPOD",
+	match.by = "Xt",
+	level = 2,
+	cap.at.quantile = 0.02,
+	metacell.celltype = pbmc.metacell.celltype,
+	metacell.celltype.col = pbmc.metacell.celltype.col
+)
+
+plotGenePeakTFScatter(
+	xymats = xymats, peak.name = peak.name, TF.name = TF.name,
+  to.plot = "TRIPOD",
+	match.by = "Yj",
+	level = 1,
+	cap.at.quantile = 0.02,
+	metacell.celltype = pbmc.metacell.celltype,
+	metacell.celltype.col = pbmc.metacell.celltype.col
+)
+
+plotGenePeakTFScatter(
+	xymats = xymats, peak.name = peak.name, TF.name = TF.name,
+  to.plot = "TRIPOD",
+	match.by = "Yj",
+	level = 2,
+	cap.at.quantile = 0.02,
+	metacell.celltype = pbmc.metacell.celltype,
+	metacell.celltype.col = pbmc.metacell.celltype.col
+)
+```
+
+Additional visualization can provide
+insights into the cell-type specificity of the regulation.
+For this purpose, we first load the Seurat object, which can be generated
+through a process described in [the preprocessing vignette](http://htmlpreview.github.io/?https://github.com/yharigaya/TRIPOD/blob/main/vignettes/preprocessing_pbmc.html).
+Alternatively, the processed Seurat object can be downloaded [here](https://www.dropbox.com/s/o6n2u2qbvvqe86g/pbmc.rds?dl=0).
+
+```{r, include = FALSE, eval = TRUE, message = FALSE, warning = FALSE}
+# for testing on a local machine only
+file <- "pbmc.rds"
+dir.data <- "~/Dropbox/TRIPOD/derived_data"
+path <- file.path(dir.data, file)
+pbmc <- readRDS(path); rm(path)
+```
+
+```{r, eval = FALSE}
+file <- "pbmc.rds"
+path <- file.path("path/to/your/dir", file)
+pbmc <- readRDS(path); rm(path)
+```
+
+The following code visualizes RNA expression of the target gene,
+chromatin accessibility of the ATAC peak region, and RNA expression of the gene
+encoding the TF in UMAP, violin, and dot plots.
+
+```{r, eval = TRUE, message = FALSE, warning = FALSE, fig.width = 9, fig.height = 3, fig.align = "center"}
+plotGenePeakTFUMAP(object = pbmc, gene.name = gene.name,
+	peak.name = peak.name, TF.name = TF.name,
+	reduction = "umap.rna", order = TRUE,
+	size.title = 12, size.axis = 12)
+```
+
+```{r, eval = TRUE, message = FALSE, warning = FALSE, fig.width = 9, fig.height = 4, fig.align = "center"}
+plotGenePeakTFVln(object = pbmc, gene.name = gene.name,
+	peak.name = peak.name, TF.name = TF.name,
+	group.by = "celltype", size.title = 12, size.axis = 12)
+```
+
+```{r, eval = TRUE, message = FALSE, warning = FALSE, fig.width = 6, fig.height = 12, fig.align = "center"}
+plotGenePeakTFDot(object = pbmc, gene.name = gene.name,
+	peak.name = peak.name, TF.name = TF.name,
+	group.by = "celltype", 
+	size.title = 12, size.axis = 12, size.legend = 12, ncol = 1)
+```
+
+# 5 Predicting RNA expression using ATAC-seq data
+
+The `performRNAPrediction()` function builds predictive models of gene expression
+on chromatin accessibility of the vicinity region.
+While this framework is not intended for genuinely prediction purposes since 
+scRNA-seq data are required as predictors, it allows for examining 
+whether TF RNA expression information improves 
+the prediction of the target gene expression in a given dataset.
+
+## 5.1 Fitting models
+
+We demonstrate the predictive modeling focusing on the *CCR7* gene.
+We utilize the `xymats` object we have created with a window size of 100 Kb 
+(see Section 4).
+
+```{r, eval = TRUE}
+gene.name <- "CCR7"
+xymats <- xymats.list[[gene.name]]
+```
+
+The following code fits a LASSO model with products of chromatin accessibility
+and TF expression as predictors.
+
+```{r, eval = TRUE}
+xymats.peak.tf.lasso <- performRNAPrediction(xymats = xymats, model.name = "peak.TF.LASSO",
+	cap.at.quantile = 0.02, seed = NULL)
+```
+
+The model can be evaluated by Pearson correlation between the observed gene
+expression and leave-one-out prediction.
+
+```{r, eval = TRUE}
+xymats.peak.tf.lasso$cor
+```
+
+For comparison, we build the gene activity model.
+
+```{r, eval = TRUE}
+xymats.gene.activity <- performRNAPrediction(xymats = xymats, model.name = "gene.activity",
+	cap.at.quantile = 0.02, seed = NULL)
+xymats.gene.activity$cor
+```
+
+We also preform LASSO on chromatin accessibility.
+
+```{r, eval = TRUE}
+xymats.peak.lasso <- performRNAPrediction(xymats = xymats, model.name = "peak.LASSO",
+	cap.at.quantile = 0.02, seed = NULL)
+xymats.peak.lasso$cor
+```
+
+## 5.2 Visualizaing the results
+
+The models can be investigated by visualization as follows.
+
+```{r, eval = TRUE, fig.width = 8, fig.height = 4, fig.align = "center"}
+par(pty = "s", mgp = c(2, 0.8, 0), mar = c(3, 3, 3, 1), mfrow = c(1, 3))
+plotRNAPrediction(
+	xymats.gene.activity, metacell.celltype = pbmc.metacell.celltype,
+	metacell.celltype.col = pbmc.metacell.celltype.col, cex.main = 0.9, cex.lab = 0.9)
+
+plotRNAPrediction(
+	xymats.peak.lasso, metacell.celltype = pbmc.metacell.celltype,
+	metacell.celltype.col = pbmc.metacell.celltype.col, cex.main = 0.9, cex.lab = 0.9)
+
+plotRNAPrediction(
+	xymats.peak.tf.lasso, metacell.celltype = pbmc.metacell.celltype,
+	metacell.celltype.col = pbmc.metacell.celltype.col, cex.main = 0.9, cex.lab = 0.9)
+```
+
+# 6 Identifying putative cell-type-specific trio regulatory relationships
+
+In this section, we demonstrate the functionality of the TRIPOD package to infer 
+cell types in which a trio regulatory relationship may be active 
+by estimating the influence of a data point in models.
+In the current version of the package, we only implement this framework with
+a linear interaction model (see [the vignette for mouse embryonic brain data] (https://htmlpreview.github.io/?https://github.com/yharigaya/TRIPOD/blob/main/vignettes/TRIPOD_e18.html)
+or [our manuscript](https://www.biorxiv.org/content/10.1101/2021.09.22.461437v1))
+due to the large computational burdens of
+performing the sampling procedure on the nonparametric models.
+
+## 6.1 Preparation
+
+We focus on the regulation of the *GNLY*
+gene by the TBX21 TF via the peak chr2-85693711-85699520, which gives
+a significanly positive coefficient of the interaction term (see below).
+
+```{r, eval = TRUE}
+gene.name <- "GNLY"
+TF.name <- "TBX21"
+peak.name <- "chr2-85693711-85699520"
+```
+
+We first obtain a `xymats` object.
+
+```{r, eval = TRUE}
+ext.upstream <- 1e5
+xymats <- getXYMatrices(gene.name = gene.name, ext.upstream = ext.upstream,
+  transcripts.gr = pbmc.transcripts.gr, peaks.gr = pbmc.peaks.gr,
+  metacell.rna = pbmc.metacell.rna, metacell.peak = pbmc.metacell.peak,
+  peakxmotif = pbmc.peakxmotif, motifxTF = pbmc.motifxTF,
+  metacell.celltype = pbmc.metacell.celltype, metacell.celltype.col = pbmc.metacell.celltype.col
+)
+```
+
+We then obtain indices for the TF and the peak.
+
+```{r, eval = TRUE}
+peak.num <- which(rownames(xymats$peakxmotif.g) == peak.name)
+TF.num <- which(xymats$TF.g == TF.name)
+```
+
+Using the indices, we obtain the $Y_g$, $X_t$, and $Y_j$ vectors.
+
+```{r, eval = TRUE}
+Yg <- xymats$Yg
+Xt <- xymats$Xt[, peak.num]
+Yj <- xymats$Yj[, TF.num]
+```
+
+We then cap the values to eliminate outliers using `capValues()`.
+
+```{r, eval = TRUE}
+cap.at.quantile <- 0.02
+Yg <- capValues(Yg, cap.at.quantile = cap.at.quantile)
+Xt <- capValues(Xt, cap.at.quantile = cap.at.quantile)
+Yj <- capValues(Yj, cap.at.quantile = cap.at.quantile)
+```
+
+We fit the linear interaction model to verify that the coefficient for the
+interaction term (`gamma.i`) is significantly positive.
+
+```{r, eval = TRUE, message = FALSE, warning = FALSE}
+xymats.example <- fitModel(xymats = xymats, model.name = "interaction") 
+c(xymats.example$gamma.i[peak.num, TF.num], xymats.example$pval.gamma.i[peak.num, TF.num])
+```
+
+## 6.2 Analyzing the influence of deleting one metacell at a time
+
+To examine the influence of deleting one metacell, we compute Cook's D
+using the `getCooksD()` function.
+Please refer to the vignettes of the `oslrr` package [here](https://cran.r-project.org/web/packages/olsrr/vignettes/intro.html) and [here](https://cran.r-project.org/web/packages/olsrr/vignettes/influence_measures.html)
+for details.
+
+```{r, eval = TRUE}
+d.list <- getCooksD(Yg, Xt, Yj, pbmc.metacell.celltype)
+p <- plotCooksD(d.list, pbmc.metacell.celltype.col)
+p
+```
+
+The following code computes DFFIT.
+
+```{r, eval = TRUE}
+d.list <- getDFFIT(Yg, Xt, Yj, pbmc.metacell.celltype)
+p <- plotDFFIT(d.list, pbmc.metacell.celltype.col)
+p
+```
+
+## 6.3 Analyzing the influence of deleting metacells of a given cell type at a time
+
+To infer the cell type in which the trio regulatory relationship may be active,
+we examine the influence of deleting metacells of each of the cell types
+simultaneously using the `deleteCelltype()` function. The following code
+obtain a matrix containing sampling $p$-values with the alternative hypothesis
+that the deletion of metacells of a given cell type decreases the coefficient
+in the regression model. That is, a small $p$-value indicates that the cell type
+positively affects the coefficient.
+
+```{r, eval = TRUE}
+delta.coeff.pval <- deleteCellType(Yg = Yg, Xt = Xt, Yj = Yj,
+	metacell.celltype = pbmc.metacell.celltype, alternative = "less")
+```
+
+The following code generates a plot of the $p$-values for the coefficient of
+the interaction term. We use a significance threshold adjusted for the number of
+cell types tested.
+
+```{r, eval = TRUE}
+ordered.celltype <- levels(pbmc$celltype)
+# delta.coeff.pval <- delta.coeff.pval[ordered.celltype, ]
+p <- plotInfluenceForCellType(delta.coeff.pval = delta.coeff.pval, coefficient = "Xt:Yj",
+	threshold = 0.05/length(ordered.celltype),
+	metacell.celltype = pbmc.metacell.celltype, metacell.celltype.col = pbmc.metacell.celltype.col,
+	ordered.celltype = ordered.celltype)
+p
+```
+
+The above result implies that the regulation of the *GNLY*
+gene by the TBX21 TF via the peak chr2-85693711-85699520 may occur in the NK cells.
+
+## 6.4 Analyzing the influence of deleting metacells of related cell types
+
+The TRIPOD package also provides a functionality to analyze the influence of
+deleting metacells of related cell types simultaneously. The first step
+in this process is to obtain a tree structure of the cell types 
+by hierarchical clustering. In this analysis, we use the RNA modality.
+
+```{r, eval = TRUE}
+dend <- getDendrogram(metacell.matrix = pbmc.metacell.rna,
+	metacell.celltype = pbmc.metacell.celltype)
+```
+
+We then obtain sampling $p$-values for subtrees in the tree structure.
+
+```{r, eval = TRUE}
+delta.coeff.pval <- deleteBranch(Yg = Yg, Xt = Xt, Yj = Yj, dend = dend,
+	alternative = "less", metacell.celltype = pbmc.metacell.celltype)
+plotTree(dend = dend, delta.coeff.pval = delta.coeff.pval,
+	metacell.celltype = pbmc.metacell.celltype, coefficient = "Xt:Yj",
+	metacell.celltype.col = pbmc.metacell.celltype.col, threshold = 0.01)
+```
+
+The above result again implies that the regulation of the *GNLY*
+gene by the TBX21 TF via the peak chr2-85693711-85699520 may occur in the NK cells.
+
+## 6.5 Visualizing the cell-type specificity of transcriptional regulation
+
+UMAP plots of influential $p$-values can be used to visualize the cell-type specificity
+of a given trio regulatory relationship.
+
+To perform the visualization, it is necessary to obtain neighboring metacells for
+each of the metacells first. The `getMetacellNeighbor()` function, which takes
+a Seurat object and returns k nearest neighbors for each point, can be used for
+this purpose. In the following code, we use the `pbmc` object, 
+which has been read into the workspace in section 4.3, and set $k$ to 4.
+
+```{r, eval = TRUE}
+reduction <- "umap.rna"
+metacell.neighbors <- getMetacellNeighbor(object = pbmc, reduction = reduction,
+	cluster.name = "seurat_clusters", k = 4)
+```
+
+As before, we obtain sampling $p$-values for each group of metacells.
+Note that the goal of this procedure is visualization and that the sampling 
+$p$-values themselves may or may not be informative.
+
+```{r, eval = TRUE}
+delta.coeff.pval <- deleteNeighbor(Yg = Yg, Xt = Xt, Yj = Yj,
+	metacell.celltype = pbmc.metacell.celltype, metacell.neighbors = metacell.neighbors,
+	alternative = "less")
+p <- plotInfluenceForNeighbor(delta.coeff.pval, coefficient = "Xt:Yj", 
+	metacell.celltype = pbmc.metacell.celltype, metacell.celltype.col = pbmc.metacell.celltype.col, 
+	threshold = 0.01)
+p
+```
+
+The following code visualizes the sampling $p$-values for the coefficient of
+the interaction term.
+
+```{r, eval = TRUE, fig.width = 5, fig.height = 5, fig.align = "center"}
+p <- plotFeatureForNeighbor(delta.coeff.pval = delta.coeff.pval, coefficient = "Xt:Yj",
+	object = pbmc, reduction = reduction, label = FALSE)
+p
+```
+
+# Session information
+
+```{r}
+sessionInfo()
+```
