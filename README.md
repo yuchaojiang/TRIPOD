@@ -13,7 +13,7 @@ using single-cell ATAC/RNA multiomic data. The main functionality of this packag
 
 * Infers trio regulatory relationships using robust nonparametric models
 * Builds RNA prediction models from ATAC-seq data
-* Identifies cell-types in which a trio regulatory relationship is active by estimating the influence of a data point in linear regression
+* Identifies influential cell types in which a trio regulatory relationship is active
 
 ## Installation
 ```r
