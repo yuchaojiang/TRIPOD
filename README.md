@@ -47,4 +47,4 @@ contain detailed descriptions of the procedure.
 * [How to handle multiple TFs with the same motif?](https://github.com/yuchaojiang/TRIPOD/blob/main/instruction/multiple.md)
 
 ## Reference
-Yuchao Jiang, Yuriko Harigaya, Zhaojun Zhang, Hongpan Zhang, Chongzhi Zang, Nancy R Zhang. Nonparametric Interrogation of Transcriptional Regulation in Single-Cell RNA and Chromatin Accessibility Multiomic Data. ***bioRxiv***, 2022. ([link](https://www.biorxiv.org/content/10.1101/2021.09.22.461437v2))
+Yuchao Jiang, Yuriko Harigaya, Zhaojun Zhang, Hongpan Zhang, Chongzhi Zang, Nancy R Zhang. Nonparametric single-cell multiomic characterization of three-way relationships between transcription factors, target genes, and chromatin accessibilities. ***Cell Systems***, 13 (9), 737-751, 2022. ([link](https://www.sciencedirect.com/science/article/abs/pii/S2405471222003489))
