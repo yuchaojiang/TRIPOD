@@ -80,7 +80,7 @@ The input CITE-seq data (`pbmc_multimodal_citeseq.h5seurat`) can be downloaded
 
 In this vignette, we start with a processed Seurat object (`pbmc.chomvar.rds`),
 which can be downloaded
-[here](https://www.dropbox.com/s/o2d9kfgdmfsu68a/pbmc.chromvar.rds?dl=0).
+[here](https://www.dropbox.com/s/3mgpzikokp85hpv/pbmc.chromvar.rds?dl=0).
 
 ## 3.2 Creating objects required for model fitting
 
@@ -187,6 +187,7 @@ the number of resultant clusters, and the number of clusters with fewer than
 threshold number of single cells. The threshold is set to 20 cells.
 
 ```{r, eval = TRUE, message = FALSE, warning = FALSE}
+set.seed(123)
 num.clusters <- optimizeResolution(
 	object = pbmc,
 	graph.name = "wsnn",
@@ -224,10 +225,8 @@ metacell.peak <- metacell.pbmc$peak
 It is necessary to save the Seurat object (`pbmc`) for running [the TRIPOD vignette](http://htmlpreview.github.io/?https://github.com/yuchaojiang/TRIPOD/blob/main/vignettes/TRIPOD_pbmc.html)
 since the object is not included in the TRIPOD package.
 
-```{r, eval = FALSE}
-file <- "pbmc.rds"
-path <- file.path("path/to/your/dir", file)
-saveRDS(pbmc, path); rm(path)
+```{r, eval = TRUE}
+saveRDS(pbmc, file = 'pbmc.rds')
 ```
 
 ## 3.5 Assigning cell types and colors for visualization
@@ -248,7 +247,7 @@ indices.
 
 ```{r, eval = TRUE, message = FALSE, warning = FALSE}
 metacell.celltype <- color.pbmc$metacell$celltype
-metacell.color <- color.pbmc$metacell$color
+metacell.celltype.col <- color.pbmc$metacell$color
 ```
 
 ## 3.6 Getting a list of target genes
@@ -262,6 +261,31 @@ The following code gives a ordered list of top 3000 HVGs.
 DefaultAssay(pbmc) <- "SCT"
 hvg.pbmc <- VariableFeatures(pbmc)
 ```
+
+## 3.7 Save intermediate files
+
+Here, we save the intermediate files that are needed for the next tutorial:
+[TRIPOD vignette for the 10x Genomics PBMC data](http://htmlpreview.github.io/?https://github.com/yuchaojiang/TRIPOD/blob/main/vignettes/TRIPOD_pbmc.html).
+
+```{r, eval = TRUE}
+pbmc.transcripts.gr=transcripts.gr
+save(pbmc.transcripts.gr, file = 'pbmc.transcripts.gr.rda')
+pbmc.peaks.gr=peaks.gr
+save(pbmc.peaks.gr, file='pbmc.peaks.gr.rda')
+pbmc.motifxTF=motifxTF
+save(pbmc.motifxTF, file='pbmc.motifxTF.rda')
+pbmc.peakxmotif=peakxmotif
+save(pbmc.peakxmotif, file='pbmc.peakxmotif.rda')
+pbmc.metacell.rna=metacell.rna
+save(pbmc.metacell.rna, file='pbmc.metacell.rna.rda')
+pbmc.metacell.peak=metacell.peak
+save(pbmc.metacell.peak, file='pbmc.metacell.peak.rda')
+pbmc.metacell.celltype=metacell.celltype
+save(pbmc.metacell.celltype, file='pbmc.metacell.celltype.rda')
+pbmc.metacell.celltype.col=metacell.celltype.col
+save(pbmc.metacell.celltype.col, file='pbmc.metacell.celltype.col.rda')
+```
+
 
 # Session information
 
