@@ -522,7 +522,7 @@ plotGenePeakTFScatter <- function(
     )
     grid()
     if (!is.null(metacell.celltype.col)) {
-      text(Xt, Yj, metacell.celltype, col = "gray", cex = 0.6)
+      text(Xt, Yg, metacell.celltype, col = "gray", cex = 0.6)
     	points(Xt, Yg,
     		col = metacell.celltype.col, pch = 16)
     }
