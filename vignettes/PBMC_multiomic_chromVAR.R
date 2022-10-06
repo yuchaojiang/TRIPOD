@@ -152,30 +152,30 @@ p3 <- DimPlot(pbmc, reduction = "wnn.umap", group.by = "predicted.celltype.l2",
               label = TRUE, label.size = 3, repel = TRUE) + ggtitle("WNN")
 p1 + p2 + p3 & NoLegend() & theme(plot.title = element_text(hjust = 0.5))
 
-pbmc$citeseq.celltype=pbmc$predicted.celltype.l2
-table(pbmc$citeseq.celltype)
+pbmc$celltype=pbmc$predicted.celltype.l2
+table(pbmc$celltype)
 
 # Remove some minor cell types (with less than 100 cells)
-pbmc=pbmc[,!pbmc$citeseq.celltype%in%names(which(table(pbmc$citeseq.celltype)<100))]
-pbmc$citeseq.celltype=droplevels(pbmc$citeseq.celltype)
-table(pbmc$citeseq.celltype)
+pbmc=pbmc[,!pbmc$celltype%in%names(which(table(pbmc$celltype)<100))]
+pbmc$celltype=droplevels(pbmc$celltype)
+table(pbmc$celltype)
 
-pbmc$citeseq.celltype[pbmc$citeseq.celltype=='cDC2']='cDC'
+pbmc$celltype[pbmc$celltype=='cDC2']='cDC'
 
 
 # Look at some cell-type markers
 # DC
-VlnPlot(pbmc, features = c("rna_CST3"), slot = "counts", log = TRUE, group.by = 'citeseq.celltype')
+VlnPlot(pbmc, features = c("rna_CST3"), slot = "counts", log = TRUE, group.by = 'celltype')
 # NK 
-VlnPlot(pbmc, features = c("rna_GNLY"), slot = "counts", log = TRUE, group.by = 'citeseq.celltype')
+VlnPlot(pbmc, features = c("rna_GNLY"), slot = "counts", log = TRUE, group.by = 'celltype')
 # B cells
-VlnPlot(pbmc, features = c("rna_MS4A1"), slot = "counts", log = TRUE, group.by = 'citeseq.celltype')
+VlnPlot(pbmc, features = c("rna_MS4A1"), slot = "counts", log = TRUE, group.by = 'celltype')
 # CD14+ mono
-VlnPlot(pbmc, features = c("rna_CD14"), slot = "counts", log = TRUE, group.by = 'citeseq.celltype')
+VlnPlot(pbmc, features = c("rna_CD14"), slot = "counts", log = TRUE, group.by = 'celltype')
 # CD8 Naive, CD8 TEM
-VlnPlot(pbmc, features = c("rna_CD8A"), slot = "counts", log = TRUE, group.by = 'citeseq.celltype')
+VlnPlot(pbmc, features = c("rna_CD8A"), slot = "counts", log = TRUE, group.by = 'celltype')
 # CD27 is a marker for Memory B cells (not Naive)
-VlnPlot(pbmc, features = c("rna_CD27"), slot = "counts", log = TRUE, group.by = 'citeseq.celltype')
+VlnPlot(pbmc, features = c("rna_CD27"), slot = "counts", log = TRUE, group.by = 'celltype')
 
 # Renormalize after QC
 # RNA analysis
@@ -194,20 +194,20 @@ pbmc <- FindMultiModalNeighbors(pbmc, reduction.list = list("pca", "lsi"), dims.
 pbmc <- RunUMAP(pbmc, nn.name = "weighted.nn", reduction.name = "wnn.umap", reduction.key = "wnnUMAP_")
 pbmc <- FindClusters(pbmc, graph.name = "wsnn", algorithm = 3, verbose = FALSE)
 
-p1<-DimPlot(pbmc, reduction = "wnn.umap", group.by = "citeseq.celltype", label = TRUE, label.size = 2.5, repel = TRUE) + ggtitle("CITE-seq alignment")
+p1<-DimPlot(pbmc, reduction = "wnn.umap", group.by = "celltype", label = TRUE, label.size = 2.5, repel = TRUE) + ggtitle("CITE-seq alignment")
 p2<-DimPlot(pbmc, reduction = "wnn.umap", label = TRUE, label.size = 2.5, repel = TRUE) + ggtitle("Seurat WNN clustering")
 p1+p2
 
-table(pbmc$seurat_clusters, pbmc$citeseq.celltype)
+table(pbmc$seurat_clusters, pbmc$celltype)
 
 # For each cluster, we only keep the main cell type
 cell.keep=rep(FALSE, ncol(pbmc))
-temp=table(pbmc$seurat_clusters, pbmc$citeseq.celltype)
+temp=table(pbmc$seurat_clusters, pbmc$celltype)
 
 for(i in 1:nrow(temp)){
   clusteri=as.numeric(rownames(temp)[i])
   celltypei=colnames(temp)[which.max(temp[i,])]
-  cell.keep[which(pbmc$seurat_clusters==clusteri & pbmc$citeseq.celltype==celltypei)]=TRUE
+  cell.keep[which(pbmc$seurat_clusters==clusteri & pbmc$celltype==celltypei)]=TRUE
 }
 pbmc=pbmc[,cell.keep]
 
@@ -228,7 +228,7 @@ pbmc <- FindMultiModalNeighbors(pbmc, reduction.list = list("pca", "lsi"), dims.
 pbmc <- RunUMAP(pbmc, nn.name = "weighted.nn", reduction.name = "wnn.umap", reduction.key = "wnnUMAP_")
 pbmc <- FindClusters(pbmc, graph.name = "wsnn", algorithm = 3, verbose = FALSE)
 
-p1<-DimPlot(pbmc, reduction = "wnn.umap", group.by = "citeseq.celltype", label = TRUE, label.size = 2.5, repel = TRUE) + ggtitle("CITE-seq alignment")
+p1<-DimPlot(pbmc, reduction = "wnn.umap", group.by = "celltype", label = TRUE, label.size = 2.5, repel = TRUE) + ggtitle("CITE-seq alignment")
 p2<-DimPlot(pbmc, reduction = "wnn.umap", label = TRUE, label.size = 2.5, repel = TRUE) + ggtitle("Seurat WNN clustering")
 p1+p2
 
