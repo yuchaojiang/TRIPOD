@@ -25,11 +25,9 @@ knitr::opts_chunk$set(
 This is a supplement to [the TRIPOD vignette for the 10x Genomics PBMC data](http://htmlpreview.github.io/?https://github.com/yuchaojiang/TRIPOD/blob/main/vignettes/TRIPOD_pbmc.html).
 Here, we demonstrate data preprocessing required for conducting
 analysis using the TRIPOD package.
-The input is sigle-cell ATAC/RNA multiomic data, which is publicly available from 
+The input is sigle-cell ATAC/RNA multiomic data of human peripheral blood 
+mononuclear cells (PBMCs), which is publicly available from 
 [10x Genomics](https://support.10xgenomics.com/single-cell-multiome-atac-gex/datasets). 
-The data was generated in 11909 cells of human peripheral blood mononuclear cells (PBMCs) 
-and contains ATAC-seq and RNA-seq read counts for 108377 ATAC peaks 
-and 36601 gene regions, respectively.
 
 # 2 Required packages
 
@@ -68,19 +66,26 @@ library(motifmatchr)
 ## 3.1 Creating and processing a Seurat object
 
 We first create and process a Seurat object essentially according to the tutorial [here](https://satijalab.org/seurat/articles/weighted_nearest_neighbor_analysis.html). 
-The input data (`pbmc_granulocyte_sorted_10k_filtered_feature_bc_matrix.h5`, `pbmc_granulocyte_sorted_10k_atac_fragments.tsv.gz`, and 
-`pbmc_granulocyte_sorted_10k_atac_fragments.tsv.gz.tbi`) can be downloaded 
-from the 10x Genomics website
-[here](https://support.10xgenomics.com/single-cell-multiome-atac-gex/datasets).
+The input data can be downlowded from below.
+
+```{sh, eval=FALSE}
+wget https://cf.10xgenomics.com/samples/cell-arc/1.0.0/pbmc_granulocyte_sorted_10k/pbmc_granulocyte_sorted_10k_filtered_feature_bc_matrix.h5
+wget https://cf.10xgenomics.com/samples/cell-arc/1.0.0/pbmc_granulocyte_sorted_10k/pbmc_granulocyte_sorted_10k_atac_fragments.tsv.gz
+wget https://cf.10xgenomics.com/samples/cell-arc/1.0.0/pbmc_granulocyte_sorted_10k/pbmc_granulocyte_sorted_10k_atac_fragments.tsv.gz.tbi
+```
 
 We obtain cell type labels according to the tutorial
 [here](https://satijalab.org/seurat/articles/multimodal_reference_mapping.html).
-The input CITE-seq data (`pbmc_multimodal_citeseq.h5seurat`) can be downloaded
-[here](https://atlas.fredhutch.org/data/nygc/multimodal/pbmc_multimodal.h5seurat).
+The input CITE-seq data can be downloaded from below.
 
-In this vignette, we start with a processed Seurat object (`pbmc.chomvar.rds`),
+```{sh, eval=FALSE}
+wget https://atlas.fredhutch.org/data/nygc/multimodal/pbmc_multimodal.h5seurat
+```
+
+In this vignette, we start with a processed Seurat object (`pbmc.chomvar.annotated.rds`),
 which can be downloaded
-[here](https://www.dropbox.com/s/3mgpzikokp85hpv/pbmc.chromvar.rds?dl=0).
+[here](https://www.dropbox.com/s/e4jbbmnhtq8kusq/pbmc.chromvar.annotated.rds?dl=0).
+The script used to generate this file is available [here](https://github.com/yuchaojiang/TRIPOD/blob/main/vignettes/PBMC_multiomic_chromVAR.R).
 
 ## 3.2 Creating objects required for model fitting
 
@@ -91,7 +96,7 @@ using the `getObjectsForModelFit()` function.
 See the documentation of the function for descriptions of these objects.
 
 ```{r, include = FALSE, eval = TRUE, message = FALSE, warning = FALSE}
-pbmc <- readRDS("pbmc.chromvar.rds")
+pbmc <- readRDS("pbmc.chromvar.annotated.rds")
 ```
 
 The following code loads the preprocessed Seurat object.
@@ -99,7 +104,7 @@ The following code loads the preprocessed Seurat object.
 the path to the directory where `pbmc.chomvar.rds` exists.
 
 ```{r, eval = FALSE}
-file <- "pbmc.chomvar.rds"
+file <- "pbmc.chromvar.annotated.rds"
 path <- file.path("path/to/your/dir", file)
 pbmc <- readRDS(path); rm(path)
 ```
@@ -238,6 +243,7 @@ which returns data frames containing
 mappings of colors to single cells, metacells, and cell types.
 
 ```{r, eval = TRUE, message = FALSE, warning = FALSE}
+pbmc$celltype=factor(pbmc$celltype)
 color.pbmc <- getColors(object = pbmc)
 ```
 
