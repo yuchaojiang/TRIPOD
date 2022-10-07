@@ -132,7 +132,7 @@ plotFeatureForNeighbor <- function(delta.coeff.pval, object, reduction,
 	object$metacell.samp.logpval <- -log(delta.coeff.pval[object$seurat_clusters, index], 10)
   p <- FeaturePlot(object, features = "metacell.samp.logpval",
   	reduction = reduction, label.size = 2, ...) +
-    ggtitle(paste("Metacell-specific p-values for", colnames(delta.coeff.pval)[index], "from sampling")) +
+    ggtitle(paste("Influential p-values for", colnames(delta.coeff.pval)[index], "from sampling")) +
     theme(plot.title = element_text(size = 10))
   return(p)
 }
