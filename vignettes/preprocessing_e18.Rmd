@@ -1,6 +1,6 @@
 ---
 title: "Data preprocessing for TRIPOD - 10x Genomics mouse embryonic brain"
-author: "Yuriko Harigaya, Nancy R. Zhang, Yuchao Jiang"
+author: "Yuchao Jiang, Yuriko Harigaya, Nancy R. Zhang"
 date: "`r format(Sys.Date())`"
 output:
     html_document:
@@ -22,7 +22,7 @@ knitr::opts_chunk$set(
 
 # 1 Introduction
 
-This is a supplement to [the TRIPOD vignette for the 10x Genomics mouse embryonic brain data](http://htmlpreview.github.io/?https://github.com/yharigaya/TRIPOD/blob/main/vignettes/TRIPOD_e18.html).
+This is a supplement to [the TRIPOD vignette for the 10x Genomics mouse embryonic brain data](http://htmlpreview.github.io/?https://github.com/yuchaojiang/TRIPOD/blob/main/vignettes/TRIPOD_e18.html).
 Here, we demonstrate data preprocessing required for conducting
 analysis using the TRIPOD package.
 The input is sigle-cell ATAC/RNA multiomic data, which is publicly available from 
@@ -33,14 +33,14 @@ and 32285 gene regions, respectively.
 
 # 2 Required packages
 
-The TRIPOD package is available from [GitHub](https://github.com/yharigaya/TRIPOD).
+The TRIPOD package is available from [GitHub](https://github.com/yuchaojiang/TRIPOD).
 
 ```{r install, eval = FALSE, message = FALSE, warning = FALSE}
 if (!requireNamespace("devtools", quietly = TRUE)) install.packages("devtools")
-devtools::install_github("yharigaya/TRIPOD/package")
+devtools::install_github("yuchaojiang/TRIPOD/package")
 ```
 
-```{r setup, eval = TRUE, message = FALSE}
+```{r setup, eval = TRUE, message = FALSE, warning = FALSE}
 library(TRIPOD)
 ```
 
@@ -52,6 +52,7 @@ library(Signac)
 library(GenomicRanges)
 library(dplyr)
 library(ggplot2)
+library(BSgenome.Mmusculus.UCSC.mm10)
 library(EnsDb.Mmusculus.v79)
 library(GenomeInfoDb)
 library(patchwork)
@@ -60,7 +61,6 @@ library(chromVAR)
 library(JASPAR2020)
 library(TFBSTools)
 library(motifmatchr)
-library(BSgenome.Mmusculus.UCSC.mm10)
 ```
 
 # 3 Preprocessing
@@ -71,23 +71,12 @@ The input data (`e18_mouse_brain_fresh_5k_filtered_feature_bc_matrix.h5`, `e18_m
 from the 10x Genomics website
 [here](https://support.10xgenomics.com/single-cell-multiome-atac-gex/datasets).
 
-```{r, include = FALSE, eval = TRUE, message = FALSE, warning = FALSE}
-# for testing on a local machine only
-file <- "e18_mouse_brain_fresh_5k_filtered_feature_bc_matrix.h5"
-dir.data <- "~/Dropbox/TRIPOD/source_data"
-path <- file.path(dir.data, file)
-inputdata.10x <- Read10X_h5(path); rm(path)
-```
-
 The following code reads in the hdf5 file from 10x Genomics, 
 `e18_mouse_brain_fresh_5k_filtered_feature_bc_matrix.h5`, which contains
 both RNA and ATAC-seq data.
-`"/path/to/your/hdf5/file"` needs to be replaced with
-the path to `e18_mouse_brain_fresh_5k_filtered_feature_bc_matrix.h5`.
 
-```{r, eval = FALSE}
-path <- "/path/to/your/hdf5/file"
-inputdata.10x <- Read10X_h5(path); rm(path)
+```{r, eval = TRUE}
+inputdata.10x <- Read10X_h5("e18_mouse_brain_fresh_5k_filtered_feature_bc_matrix.h5")
 ```
 
 ```{r, eval = TRUE, message = FALSE, warning = FALSE}
@@ -117,26 +106,15 @@ seqlevelsStyle(annotations) <- "UCSC"
 genome(annotations) <- "mm10"
 ```
 
-In the following code, `"/path/to/your/atac/fragmenets/file"` needs to be replaced with
-the path to `e18_mouse_brain_fresh_5k_atac_fragments.tsv.gz`.
+In the following code, we load the fragment file
+`e18_mouse_brain_fresh_5k_atac_fragments.tsv.gz`.
 The index file, `e18_mouse_brain_fresh_5k_atac_fragments.tsv.gz.tbi`, must be
 in the same directory.
-
-```{r, include = FALSE, eval = TRUE, message = FALSE, warning = FALSE}
-# for testing on my local machine only
-dir.data <- "~/Dropbox/TRIPOD/source_data"
-file <- "e18_mouse_brain_fresh_5k_atac_fragments.tsv.gz"
-path <- file.path(dir.data, file)
-```
-
-```{r, eval = FALSE, message = FALSE, warning = FALSE}
-path <- "/path/to/your/atac/fragmenets/file"
-```
 
 ```{r, eval = TRUE, message = FALSE, warning = FALSE}
 chrom.assay <- CreateChromatinAssay(
   counts = atac.counts, sep = c(":", "-"),
-  genome = "mm10", fragments = path,
+  genome = "mm10", fragments = "e18_mouse_brain_fresh_5k_atac_fragments.tsv.gz",
   min.cells = 10, annotation = annotations
 ); rm(path)
 e18[["ATAC"]] <- chrom.assay
@@ -388,7 +366,7 @@ Individual objects can be extracted using the following code.
 transcripts.gr <- tripod.e18$transcripts.gr
 peaks.gr <- tripod.e18$peaks.gr
 motifxTF <- tripod.e18$motifxTF
-peakxmotif <- tripod.e18$peakxmotif.gr
+peakxmotif <- tripod.e18$peakxmotif
 ```
 
 We also filter the Seurat object accordingly.
@@ -494,13 +472,11 @@ argument must to be set to the same as above.
 e18 <- removeSmallMetacells(object = e18, min.num = 20)
 ```
 
-It is necessary to save the Seurat object (`e18`) for running [the TRIPOD vignette](http://htmlpreview.github.io/?https://github.com/yharigaya/TRIPOD/blob/main/vignettes/TRIPOD_e18.html)
+It is necessary to save the Seurat object (`e18`) for running [the TRIPOD vignette](http://htmlpreview.github.io/?https://github.com/yuchaojiang/TRIPOD/blob/main/vignettes/TRIPOD_e18.html)
 since the object is not included in the TRIPOD package.
 
-```{r, eval = FALSE}
-file <- "e18.rds"
-path <- file.path("path/to/your/dir", file)
-saveRDS(e18, path); rm(path)
+```{r, eval = TRUE}
+saveRDS(e18, "e18.rds")
 ```
 
 ## 3.10 Assigning cell types and colors for visualization
@@ -511,6 +487,7 @@ we use the `getColors()` function, which returns data frames containing
 mappings of colors to single cells, metacells, and cell types.
 
 ```{r, eval = TRUE, message = FALSE, warning = FALSE}
+e18$celltype=factor(e18$celltype)
 color.e18 <- getColors(object = e18)
 ```
 
@@ -520,7 +497,7 @@ indices.
 
 ```{r, eval = TRUE, message = FALSE, warning = FALSE}
 metacell.celltype <- color.e18$metacell$celltype
-metacell.color <- color.e18$metacell$color
+metacell.celltype.col <- color.e18$metacell$color
 ```
 
 ## 3.11 Getting a list of target genes
@@ -533,6 +510,23 @@ The following code gives a ordered list of top 3000 HVGs.
 # obtain highly variable genes based on SCT
 DefaultAssay(e18) <- "SCT"
 hvg.e18 <- VariableFeatures(e18)
+```
+
+
+## 3.12 Save intermediate files
+
+Here, we save the intermediate files that are needed for the next tutorial:
+[TRIPOD vignette for the 10x Genomics mouse embryonic brain data](http://htmlpreview.github.io/?https://github.com/yuchaojiang/TRIPOD/blob/main/vignettes/TRIPOD_e18.html).
+
+```{r, eval = TRUE}
+save(transcripts.gr, file = 'transcripts.gr.rda')
+save(peaks.gr, file='peaks.gr.rda')
+save(motifxTF, file='motifxTF.rda')
+save(peakxmotif, file='peakxmotif.rda')
+save(metacell.rna, file='metacell.rna.rda')
+save(metacell.peak, file='metacell.peak.rda')
+save(metacell.celltype, file='metacell.celltype.rda')
+save(metacell.celltype.col, file='metacell.celltype.col.rda')
 ```
 
 # Session information
