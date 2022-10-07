@@ -96,6 +96,7 @@ library(BSgenome.Hsapiens.UCSC.hg38)
 library(GenomeInfoDb)
 library(patchwork)
 library(BiocParallel)
+library(dendextend)
 ```
 
 # 4 Detecting candidate trio regulatory relationships
@@ -337,7 +338,6 @@ Alternatively, the processed Seurat object can be downloaded [here](https://www.
 
 ```{r, include = FALSE, eval = TRUE, message = FALSE, warning = FALSE}
 # for testing on a local machine only
-file <- "pbmc.rds"
 pbmc <- readRDS("pbmc.rds")
 ```
 
@@ -541,7 +541,7 @@ positively affects the coefficient.
 
 ```{r, eval = TRUE}
 delta.coeff.pval <- deleteCellType(Yg = Yg, Xt = Xt, Yj = Yj,
-	metacell.celltype = pbmc.metacell.celltype, alternative = "less")
+                                   metacell.celltype = pbmc.metacell.celltype)
 ```
 
 The following code generates a plot of the $p$-values for the coefficient of
@@ -550,11 +550,11 @@ cell types tested.
 
 ```{r, eval = TRUE}
 ordered.celltype <- levels(pbmc$celltype)
-# delta.coeff.pval <- delta.coeff.pval[ordered.celltype, ]
-p <- plotInfluenceForCellType(delta.coeff.pval = delta.coeff.pval, coefficient = "Xt:Yj",
-	threshold = 0.05/length(ordered.celltype),
-	metacell.celltype = pbmc.metacell.celltype, metacell.celltype.col = pbmc.metacell.celltype.col,
-	ordered.celltype = ordered.celltype)
+p <- plotInfluenceForCellType(delta.coeff.pval = delta.coeff.pval, coefficient = "Yg",
+                              threshold = 0.05/length(ordered.celltype),
+                              metacell.celltype = pbmc.metacell.celltype,
+                              metacell.celltype.col = pbmc.metacell.celltype.col,
+                              ordered.celltype = ordered.celltype)
 p
 ```
 
@@ -577,10 +577,10 @@ We then obtain sampling $p$-values for subtrees in the tree structure.
 
 ```{r, eval = TRUE}
 delta.coeff.pval <- deleteBranch(Yg = Yg, Xt = Xt, Yj = Yj, dend = dend,
-	alternative = "less", metacell.celltype = pbmc.metacell.celltype)
+                                 metacell.celltype = pbmc.metacell.celltype)
 plotTree(dend = dend, delta.coeff.pval = delta.coeff.pval,
-	metacell.celltype = pbmc.metacell.celltype, coefficient = "Xt:Yj",
-	metacell.celltype.col = pbmc.metacell.celltype.col, threshold = 0.01)
+         metacell.celltype = pbmc.metacell.celltype, coefficient = "Yg",
+         metacell.celltype.col = pbmc.metacell.celltype.col, threshold = 0.01)
 ```
 
 The above result again implies that the regulation of the *GNLY*
@@ -600,30 +600,21 @@ which has been read into the workspace in section 4.3, and set $k$ to 4.
 ```{r, eval = TRUE}
 reduction <- "umap.rna"
 metacell.neighbors <- getMetacellNeighbor(object = pbmc, reduction = reduction,
-	cluster.name = "seurat_clusters", k = 4)
-```
+                                          cluster.name = "seurat_clusters", k = 4)
 
-As before, we obtain sampling $p$-values for each group of metacells.
-Note that the goal of this procedure is visualization and that the sampling 
-$p$-values themselves may or may not be informative.
-
-```{r, eval = TRUE}
 delta.coeff.pval <- deleteNeighbor(Yg = Yg, Xt = Xt, Yj = Yj,
-	metacell.celltype = pbmc.metacell.celltype, metacell.neighbors = metacell.neighbors,
-	alternative = "less")
-p <- plotInfluenceForNeighbor(delta.coeff.pval, coefficient = "Xt:Yj", 
-	metacell.celltype = pbmc.metacell.celltype, metacell.celltype.col = pbmc.metacell.celltype.col, 
-	threshold = 0.01)
-p
+                                   metacell.celltype = pbmc.metacell.celltype,
+                                   metacell.neighbors = metacell.neighbors,
+                                   alternative = "less")
 ```
 
-The following code visualizes the sampling $p$-values for the coefficient of
-the interaction term.
+The following code visualizes the sampling $p$-values on a UMAP plot.
 
 ```{r, eval = TRUE, fig.width = 5, fig.height = 5, fig.align = "center"}
-p <- plotFeatureForNeighbor(delta.coeff.pval = delta.coeff.pval, coefficient = "Xt:Yj",
-	object = pbmc, reduction = reduction, label = FALSE)
-p
+plotFeatureForNeighbor(delta.coeff.pval = delta.coeff.pval, coefficient = "Yg",
+                            object = pbmc, reduction = reduction, label = FALSE)
+DimPlot(pbmc, reduction = reduction, group.by = "celltype", 
+              label = TRUE, label.size = 2.5, repel = TRUE) + ggtitle("Cell type")
 ```
 
 # Session information
