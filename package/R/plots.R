@@ -62,10 +62,6 @@ plotDFFIT <- function(d.list, metacell.celltype.col, ...) {
 #' Plot sampling-based p-values for deleting a group of metacells
 #'
 #' @param delta.coeff.pval a data frame returned by {\code{\link{deleteNeighbor}}}
-#' @param coefficient a character string specifying the coefficient to be plotted.
-#' This must be one of "Xt", "Yj", and "Xt:Yj".
-#' If {\code{\link{deleteNeighbor}}} was run with an argument "two.sided",
-#' this can be set to fitted values, "Yg".
 #' @param ... further arguments to be passed.
 #' @param threshold a value of nominal p-value at which a horizontal line is drawn.
 #' @inheritParams getXYMatrices
@@ -75,15 +71,10 @@ plotDFFIT <- function(d.list, metacell.celltype.col, ...) {
 #'
 #' @import ggplot2
 #' @export
-plotInfluenceForNeighbor <- function(delta.coeff.pval, coefficient, metacell.celltype,
+plotInfluenceForNeighbor <- function(delta.coeff.pval, metacell.celltype,
 	metacell.celltype.col, threshold = 0.05, ...) {
 	items <- c("Xt", "Yj", "Xt:Yj", "Yg")
-	if (all(coefficient != items)) {
-    stop('The coefficient argument must be one of "Xt", "Yj", "Xt:Yj", or "Yg".')
-	}
-	if (coefficient == "Yg" & ncol(delta.coeff.pval) == 4) {
-		stop('The coefficient argument must be one of "Xt", "Yj", or "Xt:Yj" for one-sided tests.')
-	}
+	coefficient="Yg"
   index <- which(items == coefficient) + 1
 	d <- data.frame(
     obs = 1:length(metacell.celltype),
@@ -119,15 +110,9 @@ plotInfluenceForNeighbor <- function(delta.coeff.pval, coefficient, metacell.cel
 #'
 #' @import ggplot2
 #' @export
-plotFeatureForNeighbor <- function(delta.coeff.pval, object, reduction,
-	coefficient, ...) {
+plotFeatureForNeighbor <- function(delta.coeff.pval, object, reduction, ...) {
 	items <- c("Xt", "Yj", "Xt:Yj", "Yg")
-	if (all(coefficient != items)) {
-    stop('The coefficient argument must be one of "Xt", "Yj", "Xt:Yj", or "Yg".')
-	}
-	if (coefficient == "Yg" & ncol(delta.coeff.pval) == 4) {
-		stop('The coefficient argument must be one of "Xt", "Yj", or "Xt:Yj" for one-sided tests.')
-	}
+	coefficient = "Yg"
   index <- which(items == coefficient) + 1
 	object$metacell.samp.logpval <- -log(delta.coeff.pval[object$seurat_clusters, index], 10)
   p <- FeaturePlot(object, features = "metacell.samp.logpval",
@@ -147,15 +132,10 @@ plotFeatureForNeighbor <- function(delta.coeff.pval, object, reduction,
 #'
 #' @import ggplot2
 #' @export
-plotInfluenceForCellType <- function(delta.coeff.pval, coefficient, threshold = 0.05,
+plotInfluenceForCellType <- function(delta.coeff.pval, threshold = 0.05,
 	metacell.celltype, metacell.celltype.col, ordered.celltype) {
 	items <- c("Xt", "Yj", "Xt:Yj", "Yg")
-	if (all(coefficient != items)) {
-    stop('The coefficient argument must be one of "Xt", "Yj", "Xt:Yj", or "Yg".')
-	}
-	if (coefficient == "Yg" & ncol(delta.coeff.pval) == 4) {
-		stop('The coefficient argument must be one of "Xt", "Yj", or "Xt:Yj" for one-sided tests.')
-	}
+	coefficient = "Yg"
   index <- which(items == coefficient) + 1
   d <- data.frame(
     obs = 1:length(unique(metacell.celltype)),
@@ -191,16 +171,11 @@ plotInfluenceForCellType <- function(delta.coeff.pval, coefficient, threshold = 
 #' @import dendextend
 #' @importFrom graphics legend
 #' @export
-plotTree <- function(dend, delta.coeff.pval, coefficient,
+plotTree <- function(dend, delta.coeff.pval, 
 	metacell.celltype, metacell.celltype.col, threshold = 0.05, ...) {
   par(mar = c(6.1, 4.1, 2.1, 2.1))
 	items <- c("Xt", "Yj", "Xt:Yj", "Yg")
-	if (all(coefficient != items)) {
-    stop('The coefficient argument must be one of "Xt", "Yj", "Xt:Yj", or "Yg".')
-	}
-	if (coefficient == "Yg" & ncol(delta.coeff.pval) == 4) {
-		stop('The coefficient argument must be one of "Xt", "Yj", or "Xt:Yj" for one-sided tests.')
-	}
+	coefficient = "Yg"
   index <- which(items == coefficient) + 1
   # get subtrees, each of which corresponds to a split
   subtrees <- partition_leaves(dend)
