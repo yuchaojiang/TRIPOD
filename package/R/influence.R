@@ -215,75 +215,48 @@ getMetacellNeighbor <- function(object, reduction,
 #' @importFrom graphics abline hist par
 #'
 #' @export
-testInfluence <- function(Yg, Xt, Yj, alternative, metacell.rm, metacell.celltype,
-	plot.histogram = FALSE, nsamp = 10000, seed = 1234, ...) {
-	if (all(alternative != c("two.sided", "greater", "less"))) {
-		stop('The alternative argument must be one of "two.sided", "greater", and "less".')
-	}
-	set.seed(seed)
+testInfluence <- function(Yg, Xt, Yj, metacell.rm, metacell.celltype,
+                          plot.histogram = FALSE, nsamp = 10000, seed = 1234, ...) {
+  set.seed(seed)
   # fit a model with all data points
   model <- lm(Yg ~ Xt * Yj)
   # fit a model without the selected metacells (observed)
   model.delta.obs <- lm(Yg[-metacell.rm] ~ Xt[-metacell.rm] * Yj[-metacell.rm])
-  if (alternative == "two.sided") {
-    Yg.pred <- (model$fitted.values)
-    Yg.metacell.rm.pred <- t(as.matrix(model.delta.obs$coefficients)) %*%
-  	  rbind(rep(1, length(Yg)), Xt, Yj, (Xt * Yj))
-    delta.coeff <- matrix(ncol = 5, nrow = nsamp)
-    delta.coeff[1, 1:4] <- model.delta.obs$coefficients - model$coefficients
-    delta.coeff[1, 5] <- mean(abs(Yg.pred - Yg.metacell.rm.pred))
-    delta.coeff[1, 5] <- mean(Yg.pred - Yg.metacell.rm.pred)
-    colnames(delta.coeff) <- c(names(model$coefficients), "Yg")
-    for (ii in 2:nsamp) {
-      metacell.rm.samp <- sample(1:length(metacell.celltype), length(metacell.rm))
-      model.delta.samp <- lm(Yg[-metacell.rm.samp] ~ 1 + Xt[-metacell.rm.samp] +
-        Yj[-metacell.rm.samp] + (Xt * Yj)[-metacell.rm.samp])
-      Yg.metacell.rm.samp.pred <- t(as.matrix(model.delta.samp$coefficients)) %*%
-    	  rbind(rep(1, length(Yg)), Xt, Yj, (Xt * Yj))
-      delta.coeff[ii, 1:4] <- model.delta.samp$coefficients - model$coefficients
-      delta.coeff[ii, 5] <- mean(abs(Yg.pred - Yg.metacell.rm.samp.pred))
+  Yg.pred <- (model$fitted.values)
+  Yg.metacell.rm.pred <- t(as.matrix(model.delta.obs$coefficients)) %*%
+    rbind(rep(1, length(Yg)), Xt, Yj, (Xt * Yj))
+  delta.coeff <- matrix(ncol = 5, nrow = nsamp)
+  delta.coeff[1, 1:4] <- model.delta.obs$coefficients - model$coefficients
+  delta.coeff[1, 5] <- mean(abs(Yg.pred - Yg.metacell.rm.pred))
+  colnames(delta.coeff) <- c(names(model$coefficients), "Yg")
+  for (ii in 2:nsamp) {
+    metacell.rm.samp <- sample(1:length(metacell.celltype), length(metacell.rm))
+    model.delta.samp <- lm(Yg[-metacell.rm.samp] ~ 1 + Xt[-metacell.rm.samp] +
+                             Yj[-metacell.rm.samp] + (Xt * Yj)[-metacell.rm.samp])
+    Yg.metacell.rm.samp.pred <- t(as.matrix(model.delta.samp$coefficients)) %*%
+      rbind(rep(1, length(Yg)), Xt, Yj, (Xt * Yj))
+    delta.coeff[ii, 1:4] <- model.delta.samp$coefficients - model$coefficients
+    delta.coeff[ii, 5] <- mean(abs(Yg.pred - Yg.metacell.rm.samp.pred))
+  }
+  delta.coeff.pval <- apply(delta.coeff, 2, function(x) sum(abs(x) >= abs(x[1])) / length(x))
+  if (plot.histogram) {
+    par(mfrow = c(2, 3))
+    for (i in 1:4) {
+      hist(delta.coeff[, i], 100,
+           xlab = paste("Delta coeff. for", colnames(delta.coeff)[i]),
+           main = paste(metacell.celltype[metacell.rm][1],"\nDelta coeff. for",
+                        colnames(delta.coeff)[i], "\npval =", delta.coeff.pval[i]), ...
+      )
+      abline(v = delta.coeff[1, i], col = 2, lty = 2)
     }
-    delta.coeff.pval <- apply(delta.coeff, 2, function(x) sum(abs(x) >= abs(x[1])) / length(x))
-    if (plot.histogram) {
-      par(mfrow = c(2, 3))
-      for (i in 1:5) {
-        hist(delta.coeff[, i], 100,
-        xlab = paste("Delta for", colnames(delta.coeff)[i]),
-        main = paste("Delta coefficient for",
-          colnames(delta.coeff)[i], "\npval =", delta.coeff.pval[i]), ...
-        )
-        abline(v = delta.coeff[1, i], col = 2, lty = 2)
-      }
+    i=5
+    hist(delta.coeff[, i], 100,
+         xlab = paste("Delta for", colnames(delta.coeff)[i]),
+         main = paste(metacell.celltype[metacell.rm][1],"\nDelta for",
+                      colnames(delta.coeff)[i], "\npval =", delta.coeff.pval[i]), ...
+    )
+    abline(v = delta.coeff[1, i], col = 2, lty = 2)
     par(mfrow = c(1, 1))
-    }
-  } else if (alternative %in% c("greater", "less")) {
-    delta.coeff <- matrix(ncol = 4, nrow = nsamp)
-    colnames(delta.coeff) <- c("Intercept", "Xt", "Yj", "Xt:Yj")
-    delta.coeff[1, 1:4] <- model$coefficients - model.delta.obs$coefficients
-    for (ii in 2:nsamp) {
-      metacell.rm.samp <- sample(1:length(metacell.celltype), length(metacell.rm))
-      model.delta.samp <- lm(Yg[-metacell.rm.samp] ~ Xt[-metacell.rm.samp] * Yj[-metacell.rm.samp])
-      delta.coeff[ii, 1:4] <- model$coefficients - model.delta.samp$coefficients
-    }
-    if (alternative == "greater") {
-    	delta.coeff.pval <- apply(delta.coeff, 2, function(x) sum(x >= x[1]) / length(x))
-    } else if (alternative == "less") {
-    	delta.coeff.pval <- apply(delta.coeff, 2, function(x) sum(x <= x[1]) / length(x))
-    }
-    if (plot.histogram) {
-      par(mfrow = c(2, 2), mar = c(3, 3, 3, 1))
-      for (i in 1:4) {
-        hist(delta.coeff[, i], 100,
-  	    xlab = paste("Delta for", colnames(delta.coeff)[i]),
-        main = paste("Delta coefficient for",
-        colnames(delta.coeff)[i], "\npval =", delta.coeff.pval[i]),
-  	    font.main = 1, cex.main = 1, ...
-        )
-        abline(v = delta.coeff[1, i], col = 2, lty = 2)
-      }
-      par(mfrow = c(1, 1), mar = c(5.1, 4.1, 4.1, 2.1))
-    }
   }
   return(delta.coeff.pval)
 }
-
