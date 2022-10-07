@@ -96,26 +96,18 @@ deleteNeighbor <- function(Yg, Xt, Yj, alternative,
 #' @return A data frame containing p-values.
 #'
 #' @export
-deleteCellType <- function(Yg, Xt, Yj, metacell.celltype,
-	alternative, seed = 1234, ...) {
-	if (all(alternative != c("two.sided", "greater", "less"))) {
-		stop('The alternative argument must be one of "two.sided", "greater", or "less".')
-	}
-	set.seed(seed)
-	if (alternative == "two.sided") {
-		items <- c("Intercept", "Xt", "Yj", "Xt:Yj", "Yg")
-	} else if (alternative %in% c("greater", "less")) {
-		items <- c("Intercept", "Xt", "Yj", "Xt:Yj")
-	}
-  delta.coeff.pval <- matrix(nrow = length(unique(metacell.celltype)), ncol = length(items))
-  colnames(delta.coeff.pval) <- items
+deleteCellType <- function(Yg, Xt, Yj, metacell.celltype, seed = 1234, ...) {
+  set.seed(seed)
+  delta.coeff.pval <- matrix(nrow = length(unique(metacell.celltype)), ncol = 5)
+  colnames(delta.coeff.pval) <- c("Intercept", "Xt", "Yj", "Xt:Yj", "Yg")
   rownames(delta.coeff.pval) <- unique(metacell.celltype)
   for (metacell.rm.celltype in unique(metacell.celltype)) {
     metacell.rm <- which(metacell.celltype == metacell.rm.celltype)
     delta.coeff.pval[metacell.rm.celltype, ] <- testInfluence(
-    	Yg = Yg, Xt = Xt, Yj = Yj, metacell.rm = metacell.rm, metacell.celltype = metacell.celltype,
-    	alternative = alternative, plot.histogram = FALSE, nsamp = 1000, seed = seed)
-    }
+      Yg = Yg, Xt = Xt, Yj = Yj, metacell.rm = metacell.rm, 
+      metacell.celltype = metacell.celltype, 
+      plot.histogram = FALSE, nsamp = 10000, seed = seed)
+  }
   return(delta.coeff.pval)
 }
 
