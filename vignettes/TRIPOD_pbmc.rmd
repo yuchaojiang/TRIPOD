@@ -456,7 +456,7 @@ performing the sampling procedure on the nonparametric models.
 
 We focus on the regulation of the *GNLY*
 gene by the TBX21 TF via the peak chr2-85693711-85699520, which gives
-a significanly positive coefficient of the interaction term (see below).
+a significantly positive coefficient of the interaction term (see below).
 
 ```{r, eval = TRUE}
 gene.name <- "GNLY"
@@ -533,24 +533,18 @@ p
 
 To infer the cell type in which the trio regulatory relationship may be active,
 we examine the influence of deleting metacells of each of the cell types
-simultaneously using the `deleteCelltype()` function. The following code
-obtain a matrix containing sampling $p$-values with the alternative hypothesis
-that the deletion of metacells of a given cell type decreases the coefficient
-in the regression model. That is, a small $p$-value indicates that the cell type
-positively affects the coefficient.
+simultaneously using the `deleteCelltype()` function.
 
 ```{r, eval = TRUE}
 delta.coeff.pval <- deleteCellType(Yg = Yg, Xt = Xt, Yj = Yj,
                                    metacell.celltype = pbmc.metacell.celltype)
 ```
 
-The following code generates a plot of the $p$-values for the coefficient of
-the interaction term. We use a significance threshold adjusted for the number of
-cell types tested.
+The following code generates a plot of the $p$-values.
 
 ```{r, eval = TRUE}
 ordered.celltype <- levels(pbmc$celltype)
-p <- plotInfluenceForCellType(delta.coeff.pval = delta.coeff.pval, coefficient = "Yg",
+p <- plotInfluenceForCellType(delta.coeff.pval = delta.coeff.pval,
                               threshold = 0.05/length(ordered.celltype),
                               metacell.celltype = pbmc.metacell.celltype,
                               metacell.celltype.col = pbmc.metacell.celltype.col,
@@ -579,7 +573,7 @@ We then obtain sampling $p$-values for subtrees in the tree structure.
 delta.coeff.pval <- deleteBranch(Yg = Yg, Xt = Xt, Yj = Yj, dend = dend,
                                  metacell.celltype = pbmc.metacell.celltype)
 plotTree(dend = dend, delta.coeff.pval = delta.coeff.pval,
-         metacell.celltype = pbmc.metacell.celltype, coefficient = "Yg",
+         metacell.celltype = pbmc.metacell.celltype, 
          metacell.celltype.col = pbmc.metacell.celltype.col, threshold = 0.01)
 ```
 
@@ -611,7 +605,7 @@ delta.coeff.pval <- deleteNeighbor(Yg = Yg, Xt = Xt, Yj = Yj,
 The following code visualizes the sampling $p$-values on a UMAP plot.
 
 ```{r, eval = TRUE, fig.width = 5, fig.height = 5, fig.align = "center"}
-plotFeatureForNeighbor(delta.coeff.pval = delta.coeff.pval, coefficient = "Yg",
+plotFeatureForNeighbor(delta.coeff.pval = delta.coeff.pval, 
                             object = pbmc, reduction = reduction, label = FALSE)
 DimPlot(pbmc, reduction = reduction, group.by = "celltype", 
               label = TRUE, label.size = 2.5, repel = TRUE) + ggtitle("Cell type")

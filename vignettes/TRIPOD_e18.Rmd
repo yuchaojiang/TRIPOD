@@ -533,7 +533,7 @@ performing the sampling procedure on the nonparametric models.
 
 We focus on the regulation of the *Neurog2*
 gene by the Pax6 TF via the peak chr3-127639075-127643093, which gives
-a significanly positive coefficient of the interaction term (see below).
+a significantly positive coefficient of the interaction term (see below).
 
 ```{r, eval = TRUE}
 gene.name <- "Neurog2"
@@ -610,25 +610,19 @@ p
 
 To infer the cell type in which the trio regulatory relationship may be active,
 we examine the influence of deleting metacells of each of the cell types
-simultaneously using the `deleteCelltype()` function. The following code
-obtain a matrix containing sampling $p$-values with the alternative hypothesis
-that the deletion of metacells of a given cell type decreases the coefficient
-in the regression model. That is, a small $p$-value indicates that the cell type
-positively affects the coefficient.
+simultaneously using the `deleteCelltype()` function.
 
 ```{r, eval = TRUE}
 delta.coeff.pval <- deleteCellType(Yg = Yg, Xt = Xt, Yj = Yj,
 	metacell.celltype = metacell.celltype)
 ```
 
-The following code generates a plot of the $p$-values for the coefficient of
-the interaction term.
+The following code generates a plot of the $p$-values.
 
 ```{r, eval = TRUE}
 ordered.celltype <- c("Radial glia", "Neuroblast", "GABAergic",
 	"Glutamatergic", "Glioblast", "Oligodendrocyte", "Cajal-Retzius")
-p <- plotInfluenceForCellType(delta.coeff.pval = delta.coeff.pval, coefficient = "Yg",
-	threshold = 0.01,
+p <- plotInfluenceForCellType(delta.coeff.pval = delta.coeff.pval, threshold = 0.01,
 	metacell.celltype = metacell.celltype, metacell.celltype.col = metacell.celltype.col,
 	ordered.celltype = ordered.celltype)
 p
@@ -656,7 +650,7 @@ We then obtain sampling $p$-values for subtrees in the tree structure.
 delta.coeff.pval <- deleteBranch(Yg = Yg, Xt = Xt, Yj = Yj, dend = dend,
 	metacell.celltype = metacell.celltype)
 plotTree(dend = dend, delta.coeff.pval = delta.coeff.pval,
-	metacell.celltype = metacell.celltype, coefficient = "Yg",
+	metacell.celltype = metacell.celltype, 
 	metacell.celltype.col = metacell.celltype.col, threshold = 0.01)
 ```
 
@@ -688,7 +682,7 @@ delta.coeff.pval <- deleteNeighbor(Yg = Yg, Xt = Xt, Yj = Yj,
 The following code visualizes the sampling $p$-values on a UMAP plot.
 
 ```{r, eval = TRUE, fig.width = 5, fig.height = 5, fig.align = "center"}
-p <- plotFeatureForNeighbor(delta.coeff.pval = delta.coeff.pval, coefficient = "Yg",
+p <- plotFeatureForNeighbor(delta.coeff.pval = delta.coeff.pval, 
 	object = e18, reduction = reduction, label = FALSE)
 p
 ```
