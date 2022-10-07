@@ -125,28 +125,20 @@ deleteCellType <- function(Yg, Xt, Yj, metacell.celltype, seed = 1234, ...) {
 #'
 #' @import dendextend
 #' @export
-deleteBranch <- function(Yg, Xt, Yj, dend, alternative,
-	metacell.celltype, seed = 1234, ...) {
-	if (all(alternative != c("two.sided", "greater", "less"))) {
-		stop('The alternative argument must be one of "two.sided", "greater", or "less".')
-	}
-	set.seed(seed)
-	if (alternative == "two.sided") {
-		items <- c("Intercept", "Xt", "Yj", "Xt:Yj", "Yg")
-	} else if (alternative %in% c("greater", "less")) {
-		items <- c("Intercept", "Xt", "Yj", "Xt:Yj")
-	}
+deleteBranch <- function(Yg, Xt, Yj, dend, metacell.celltype, seed = 1234, ...) {
+  set.seed(seed)
   # get subtrees, each of which corresponds to a split
   subtrees <- partition_leaves(dend)
   # remove cell types at each split
-  delta.coeff.pval <- matrix(nrow = length(subtrees), ncol = length(items), data = NA)
-  colnames(delta.coeff.pval) <- items
+  delta.coeff.pval <- matrix(nrow = length(subtrees), ncol = 5, data = NA)
+  colnames(delta.coeff.pval) <- c("Intercept", "Xt", "Yj", "Xt:Yj", "Yg")
   rownames(delta.coeff.pval) <- 1:length(subtrees)
   for (i in 2:length(subtrees)) {
     metacell.rm <- which(metacell.celltype %in% subtrees[[i]])
     delta.coeff.pval[i, ] <- testInfluence(
-    	Yg = Yg, Xt = Xt, Yj = Yj, metacell.rm = metacell.rm, metacell.celltype = metacell.celltype,
-    	alternative = alternative, plot.histogram = FALSE, nsamp = 1000, seed = seed)
+      Yg = Yg, Xt = Xt, Yj = Yj, metacell.rm = metacell.rm,
+      metacell.celltype = metacell.celltype,
+      plot.histogram = FALSE, nsamp = 10000, seed = seed)
   }
   return(delta.coeff.pval)
 }
