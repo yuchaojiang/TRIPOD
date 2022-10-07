@@ -138,7 +138,7 @@ deleteBranch <- function(Yg, Xt, Yj, dend, metacell.celltype, seed = 1234, ...) 
     delta.coeff.pval[i, ] <- testInfluence(
       Yg = Yg, Xt = Xt, Yj = Yj, metacell.rm = metacell.rm,
       metacell.celltype = metacell.celltype,
-      plot.histogram = FALSE, nsamp = 10000, seed = seed)
+      plot.histogram = FALSE, nsamp = 2000, seed = seed)
   }
   return(delta.coeff.pval)
 }
