@@ -62,25 +62,18 @@ getDFFIT <- function(Yg, Xt, Yj, metacell.celltype, ...) {
 #' number of meta cells.
 #'
 #' @export
-deleteNeighbor <- function(Yg, Xt, Yj, alternative,
-	metacell.celltype, metacell.neighbors, seed = 1234, ...) {
-	if (all(alternative != c("two.sided", "greater", "less"))) {
-		stop('The alternative argument must be one of "two.sided", "greater", or "less".')
-	}
-	set.seed(seed)
-	if (alternative == "two.sided") {
-		items <- c("Intercept", "Xt", "Yj", "Xt:Yj", "Yg")
-	} else if (alternative %in% c("greater", "less")) {
-		items <- c("Intercept", "Xt", "Yj", "Xt:Yj")
-	}
-  delta.coeff.pval <- matrix(nrow = length(metacell.celltype), ncol = length(items))
-  colnames(delta.coeff.pval) <- items
+deleteNeighbor <- function(Yg, Xt, Yj, metacell.celltype, 
+                           metacell.neighbors, seed = 1234, ...) {
+  set.seed(seed)
+  delta.coeff.pval <- matrix(nrow = length(metacell.celltype), ncol = 5)
+  colnames(delta.coeff.pval) <- c("Intercept", "Xt", "Yj", "Xt:Yj", "Yg")
   for (i in 1:length(metacell.celltype)) {
-  	metacell.rm <- metacell.neighbors[i, ]
+    metacell.rm <- metacell.neighbors[i, ]
     delta.coeff.pval[i, ] <- testInfluence(Yg = Yg, Xt = Xt, Yj = Yj,
-    	metacell.celltype = metacell.celltype,
-    	metacell.rm = metacell.rm, alternative = alternative,
-      plot.histogram = FALSE, nsamp = 1000, seed = seed)
+                                           metacell.celltype = metacell.celltype,
+                                           metacell.rm = metacell.rm, 
+                                           plot.histogram = FALSE,
+                                           nsamp = 1000, seed = seed)
   }
   return(delta.coeff.pval)
 }
@@ -138,7 +131,7 @@ deleteBranch <- function(Yg, Xt, Yj, dend, metacell.celltype, seed = 1234, ...) 
     delta.coeff.pval[i, ] <- testInfluence(
       Yg = Yg, Xt = Xt, Yj = Yj, metacell.rm = metacell.rm,
       metacell.celltype = metacell.celltype,
-      plot.histogram = FALSE, nsamp = 2000, seed = seed)
+      plot.histogram = FALSE, nsamp = 1000, seed = seed)
   }
   return(delta.coeff.pval)
 }
