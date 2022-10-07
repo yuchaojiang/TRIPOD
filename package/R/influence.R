@@ -193,8 +193,6 @@ getMetacellNeighbor <- function(object, reduction,
 #' @param Yg a numeric vector containing RNA expression values.
 #' @param Xt a numeric vector containing chromatin accessibility.
 #' @param Yj a numeric vector containing TF expression.
-#' @param alternative a character string specifying the alternative hypothesis.
-#' This must be one of "two.sided", "greater", and "less".
 #' @param metacell.rm an integer vector containing indices of metacells
 #' to be removed.
 #' @param metacell.celltype a character vector specifying cell types of the metacells.
