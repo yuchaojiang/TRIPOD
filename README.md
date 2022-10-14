@@ -5,7 +5,7 @@ Nonparametric interrogation of transcriptional regulation in single-cell RNA and
 Yuchao Jiang, Yuriko Harigaya, Nancy R. Zhang
 
 ## Maintainer
-Yuchao jiang <yuchaoj@email.unc.edu>
+Yuchao Jiang <yuchaoj@email.unc.edu>
 
 ## Description
 TRIPOD is a statistical framework for detecting three-way regulatory relationships between a cis-regulatory region, a transcription factor, and a target gene, which we call a "trio,"
