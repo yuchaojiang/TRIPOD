@@ -6,10 +6,6 @@
 #' @param object a Seurat object.
 #' @param chr a character string specifying chromosomes. This would be
 #' `paste0("chr", 1:22)` for the autosomes in human.
-#' @param convert a logical variable to indicate whether the gene names need
-#' to be converted. The current
-#' version only supports conversion from human to mouse.
-#' This is necessary when a human motif dataset is used for analyzing mouse data.
 #'
 #' @return This function returns a list object with the following elements.
 #' \describe{
@@ -24,11 +20,8 @@
 #' @import GenomicRanges Seurat Signac
 #' @export
 #'
-getObjectsForModelFit <- function(
-                                  object,
-                                  chr,
-	                                convert = FALSE
-                                  ){
+getObjectsForModelFit <- function(object,
+                                  chr){
     DefaultAssay(object) <- "ATAC"
     transcripts.gr <- Signac:::CollapseToLongestTranscript(ranges = Annotation(object))
     transcripts.gr <- transcripts.gr[transcripts.gr$gene_biotype == "protein_coding"]
@@ -39,13 +32,15 @@ getObjectsForModelFit <- function(
     motifxTF <- cbind(names(motifxTF), motifxTF)
     colnames(motifxTF) <- c("motif", "TF")
     peakxmotif <- object@assays$ATAC@motifs@data
-    if (convert) {
-      motifxTF[, 2] <- stringr::str_to_title(tolower(motifxTF[, 2]))
-    }
-
+    
     # keep motifs when genes encoding corresponding TFs are present in the RNA-seq data
-    peakxmotif <- peakxmotif[, motifxTF[, 2] %in% rownames(object@assays$RNA)]
-    motifxTF <- motifxTF[motifxTF[, 2] %in% rownames(object@assays$RNA), ]
+    sel <- motifxTF[, 2]%in%toupper(rownames(object@assays$RNA))
+    peakxmotif <- peakxmotif[, sel]
+    motifxTF <- motifxTF[sel, ]
+  
+    # Change the TF name to be consistent with genes (esp. for the mouse genome)
+    motifxTF[, 2] <- rownames(object@assays$RNA)[match(motifxTF[, 2], toupper(rownames(object@assays$RNA)))]
+	
     # perform further data filtering to ensure that the same set of genes is included in all objects
     genes <- intersect(transcripts.gr$gene_name, rownames(object@assays$SCT))
     DefaultAssay(object) <- "RNA"
