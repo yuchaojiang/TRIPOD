@@ -11,7 +11,7 @@
 
 <meta name="author" content="Yuchao Jiang, Yuriko Harigaya, Nancy R. Zhang" />
 
-<meta name="date" content="2022-10-05" />
+<meta name="date" content="2022-10-29" />
 
 <title>Data preprocessing for TRIPOD - 10x Genomics PBMC 10k</title>
 
@@ -454,7 +454,7 @@ pre code {
 <h1 class="title toc-ignore">Data preprocessing for TRIPOD - 10x
 Genomics PBMC 10k</h1>
 <h4 class="author">Yuchao Jiang, Yuriko Harigaya, Nancy R. Zhang</h4>
-<h4 class="date">2022-10-05</h4>
+<h4 class="date">2022-10-29</h4>
 
 </div>
 
@@ -556,12 +556,8 @@ for model fitting (see above). Note the following points.</p>
 present in the RNA-seq data.</li>
 <li>We ensure that the same set of genes is included in all
 objects.</li>
-<li>To change the TF symbols to gene symbols, use
-<code>convert = FALSE</code> for human data and
-<code>convert = TRUE</code> for mouse data.</li>
 </ul>
-<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>tripod.pbmc <span class="ot">&lt;-</span> <span class="fu">getObjectsForModelFit</span>(<span class="at">object =</span> pbmc, <span class="at">chr =</span> <span class="fu">paste0</span>(<span class="st">&quot;chr&quot;</span>, <span class="dv">1</span><span class="sc">:</span><span class="dv">22</span>), </span>
-<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>    <span class="at">convert =</span> <span class="cn">FALSE</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>tripod.pbmc <span class="ot">&lt;-</span> <span class="fu">getObjectsForModelFit</span>(<span class="at">object =</span> pbmc, <span class="at">chr =</span> <span class="fu">paste0</span>(<span class="st">&quot;chr&quot;</span>, <span class="dv">1</span><span class="sc">:</span><span class="dv">22</span>))</span></code></pre></div>
 <p>Individual objects can be extracted using the following code.</p>
 <div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>transcripts.gr <span class="ot">&lt;-</span> tripod.pbmc<span class="sc">$</span>transcripts.gr</span>
 <span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>peaks.gr <span class="ot">&lt;-</span> tripod.pbmc<span class="sc">$</span>peaks.gr</span>
@@ -741,7 +737,7 @@ vignette for the 10x Genomics PBMC data</a>.</p>
 <span id="cb21-35"><a href="#cb21-35" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   [1] rappdirs_0.3.3              scattermore_0.8            </span></span>
 <span id="cb21-36"><a href="#cb21-36" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   [3] R.methodsS3_1.8.1           tidyr_1.2.1                </span></span>
 <span id="cb21-37"><a href="#cb21-37" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   [5] bit64_4.0.5                 knitr_1.40                 </span></span>
-<span id="cb21-38"><a href="#cb21-38" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   [7] R.utils_2.11.0              irlba_2.3.5                </span></span>
+<span id="cb21-38"><a href="#cb21-38" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   [7] R.utils_2.11.0              irlba_2.3.5.1              </span></span>
 <span id="cb21-39"><a href="#cb21-39" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   [9] DelayedArray_0.20.0         data.table_1.14.2          </span></span>
 <span id="cb21-40"><a href="#cb21-40" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  [11] rpart_4.1.16                KEGGREST_1.34.0            </span></span>
 <span id="cb21-41"><a href="#cb21-41" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  [13] RCurl_1.98-1.6              generics_0.1.3             </span></span>
@@ -759,7 +755,7 @@ vignette for the 10x Genomics PBMC data</a>.</p>
 <span id="cb21-53"><a href="#cb21-53" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  [37] dendextend_1.16.0           dbplyr_2.1.1               </span></span>
 <span id="cb21-54"><a href="#cb21-54" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  [39] igraph_1.3.5                DBI_1.1.2                  </span></span>
 <span id="cb21-55"><a href="#cb21-55" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  [41] htmlwidgets_1.5.4           spatstat.geom_2.4-0        </span></span>
-<span id="cb21-56"><a href="#cb21-56" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  [43] purrr_0.3.4                 ellipsis_0.3.2             </span></span>
+<span id="cb21-56"><a href="#cb21-56" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  [43] purrr_0.3.5                 ellipsis_0.3.2             </span></span>
 <span id="cb21-57"><a href="#cb21-57" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  [45] backports_1.4.1             annotate_1.72.0            </span></span>
 <span id="cb21-58"><a href="#cb21-58" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  [47] biomaRt_2.50.3              deldir_1.0-6               </span></span>
 <span id="cb21-59"><a href="#cb21-59" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  [49] MatrixGenerics_1.6.0        vctrs_0.4.2                </span></span>
@@ -774,7 +770,7 @@ vignette for the 10x Genomics PBMC data</a>.</p>
 <span id="cb21-68"><a href="#cb21-68" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  [67] glmnet_4.1-4                pkgconfig_2.0.3            </span></span>
 <span id="cb21-69"><a href="#cb21-69" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  [69] nlme_3.1-157                ProtGenerics_1.26.0        </span></span>
 <span id="cb21-70"><a href="#cb21-70" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  [71] nnet_7.3-17                 rlang_1.0.6                </span></span>
-<span id="cb21-71"><a href="#cb21-71" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  [73] globals_0.16.1              lifecycle_1.0.2            </span></span>
+<span id="cb21-71"><a href="#cb21-71" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  [73] globals_0.16.1              lifecycle_1.0.3            </span></span>
 <span id="cb21-72"><a href="#cb21-72" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  [75] miniUI_0.1.1.1              filelock_1.0.2             </span></span>
 <span id="cb21-73"><a href="#cb21-73" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  [77] BiocFileCache_2.2.1         polyclip_1.10-0            </span></span>
 <span id="cb21-74"><a href="#cb21-74" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  [79] matrixStats_0.62.0          lmtest_0.9-40              </span></span>
@@ -825,7 +821,7 @@ vignette for the 10x Genomics PBMC data</a>.</p>
 <span id="cb21-119"><a href="#cb21-119" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [169] codetools_0.2-18            utf8_1.2.2                 </span></span>
 <span id="cb21-120"><a href="#cb21-120" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [171] lattice_0.20-45             bslib_0.4.0                </span></span>
 <span id="cb21-121"><a href="#cb21-121" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [173] spatstat.sparse_2.1-1       tibble_3.1.8               </span></span>
-<span id="cb21-122"><a href="#cb21-122" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [175] curl_4.3.2                  leiden_0.4.3               </span></span>
+<span id="cb21-122"><a href="#cb21-122" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [175] curl_4.3.3                  leiden_0.4.3               </span></span>
 <span id="cb21-123"><a href="#cb21-123" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [177] gtools_3.9.3                GO.db_3.14.0               </span></span>
 <span id="cb21-124"><a href="#cb21-124" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [179] interp_1.1-3                survival_3.3-1             </span></span>
 <span id="cb21-125"><a href="#cb21-125" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [181] rmarkdown_2.13              nbpMatching_1.5.1          </span></span>

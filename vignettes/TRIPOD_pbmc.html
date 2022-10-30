@@ -11,7 +11,7 @@
 
 <meta name="author" content="Yuchao Jiang, Yuriko Harigaya, Nancy R. Zhang" />
 
-<meta name="date" content="2022-10-07" />
+<meta name="date" content="2022-10-29" />
 
 <title>TRIPOD - 10x Genomics PBMC 10k</title>
 
@@ -431,7 +431,7 @@ pre code {
 
 <h1 class="title toc-ignore">TRIPOD - 10x Genomics PBMC 10k</h1>
 <h4 class="author">Yuchao Jiang, Yuriko Harigaya, Nancy R. Zhang</h4>
-<h4 class="date">2022-10-07</h4>
+<h4 class="date">2022-10-29</h4>
 
 </div>
 
@@ -1051,61 +1051,60 @@ which has been read into the workspace in section 4.3, and set <span class="math
 <span id="cb41-66"><a href="#cb41-66" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  [67] devtools_2.4.3              rlang_1.0.6                </span></span>
 <span id="cb41-67"><a href="#cb41-67" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  [69] globals_0.16.1              lifecycle_1.0.3            </span></span>
 <span id="cb41-68"><a href="#cb41-68" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  [71] miniUI_0.1.1.1              filelock_1.0.2             </span></span>
-<span id="cb41-69"><a href="#cb41-69" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  [73] BiocFileCache_2.2.1         rprojroot_2.0.3            </span></span>
-<span id="cb41-70"><a href="#cb41-70" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  [75] polyclip_1.10-0             matrixStats_0.62.0         </span></span>
-<span id="cb41-71"><a href="#cb41-71" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  [77] lmtest_0.9-40               Matrix_1.5-1               </span></span>
-<span id="cb41-72"><a href="#cb41-72" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  [79] carData_3.0-5               zoo_1.8-11                 </span></span>
-<span id="cb41-73"><a href="#cb41-73" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  [81] base64enc_0.1-3             ggridges_0.5.4             </span></span>
-<span id="cb41-74"><a href="#cb41-74" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  [83] processx_3.7.0              png_0.1-7                  </span></span>
-<span id="cb41-75"><a href="#cb41-75" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  [85] viridisLite_0.4.1           rjson_0.2.21               </span></span>
-<span id="cb41-76"><a href="#cb41-76" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  [87] bitops_1.0-7                KernSmooth_2.23-20         </span></span>
-<span id="cb41-77"><a href="#cb41-77" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  [89] blob_1.2.2                  shape_1.4.6                </span></span>
-<span id="cb41-78"><a href="#cb41-78" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  [91] stringr_1.4.1               parallelly_1.32.1          </span></span>
-<span id="cb41-79"><a href="#cb41-79" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  [93] spatstat.random_2.2-0       jpeg_0.1-9                 </span></span>
-<span id="cb41-80"><a href="#cb41-80" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  [95] scales_1.2.1                memoise_2.0.1              </span></span>
-<span id="cb41-81"><a href="#cb41-81" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  [97] magrittr_2.0.3              plyr_1.8.7                 </span></span>
-<span id="cb41-82"><a href="#cb41-82" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  [99] ica_1.0-3                   zlibbioc_1.40.0            </span></span>
-<span id="cb41-83"><a href="#cb41-83" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [101] compiler_4.1.3              BiocIO_1.4.0               </span></span>
-<span id="cb41-84"><a href="#cb41-84" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [103] RColorBrewer_1.1-3          fitdistrplus_1.1-8         </span></span>
-<span id="cb41-85"><a href="#cb41-85" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [105] Rsamtools_2.10.0            cli_3.4.1                  </span></span>
-<span id="cb41-86"><a href="#cb41-86" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [107] listenv_0.8.0               pbapply_1.5-0              </span></span>
-<span id="cb41-87"><a href="#cb41-87" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [109] ps_1.7.1                    htmlTable_2.4.1            </span></span>
-<span id="cb41-88"><a href="#cb41-88" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [111] Formula_1.2-4               MASS_7.3-56                </span></span>
-<span id="cb41-89"><a href="#cb41-89" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [113] mgcv_1.8-40                 tidyselect_1.1.2           </span></span>
-<span id="cb41-90"><a href="#cb41-90" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [115] stringi_1.7.8               highr_0.9                  </span></span>
-<span id="cb41-91"><a href="#cb41-91" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [117] yaml_2.3.5                  latticeExtra_0.6-30        </span></span>
-<span id="cb41-92"><a href="#cb41-92" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [119] ggrepel_0.9.1               grid_4.1.3                 </span></span>
-<span id="cb41-93"><a href="#cb41-93" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [121] sass_0.4.2                  fastmatch_1.1-3            </span></span>
-<span id="cb41-94"><a href="#cb41-94" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [123] tools_4.1.3                 future.apply_1.9.1         </span></span>
-<span id="cb41-95"><a href="#cb41-95" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [125] parallel_4.1.3              rstudioapi_0.14            </span></span>
-<span id="cb41-96"><a href="#cb41-96" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [127] foreach_1.5.2               foreign_0.8-82             </span></span>
-<span id="cb41-97"><a href="#cb41-97" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [129] gridExtra_2.3               farver_2.1.1               </span></span>
-<span id="cb41-98"><a href="#cb41-98" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [131] Rtsne_0.16                  digest_0.6.29              </span></span>
-<span id="cb41-99"><a href="#cb41-99" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [133] rgeos_0.5-9                 FNN_1.1.3.1                </span></span>
-<span id="cb41-100"><a href="#cb41-100" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [135] shiny_1.7.2                 nortest_1.0-4              </span></span>
-<span id="cb41-101"><a href="#cb41-101" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [137] Rcpp_1.0.9                  car_3.1-0                  </span></span>
-<span id="cb41-102"><a href="#cb41-102" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [139] later_1.3.0                 RcppAnnoy_0.0.19           </span></span>
-<span id="cb41-103"><a href="#cb41-103" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [141] httr_1.4.4                  colorspace_2.0-3           </span></span>
-<span id="cb41-104"><a href="#cb41-104" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [143] XML_3.99-0.9                fs_1.5.2                   </span></span>
-<span id="cb41-105"><a href="#cb41-105" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [145] tensor_1.5                  reticulate_1.26            </span></span>
-<span id="cb41-106"><a href="#cb41-106" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [147] splines_4.1.3               uwot_0.1.14                </span></span>
-<span id="cb41-107"><a href="#cb41-107" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [149] RcppRoll_0.3.0              spatstat.utils_2.3-1       </span></span>
-<span id="cb41-108"><a href="#cb41-108" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [151] plotly_4.10.0               sessioninfo_1.2.2          </span></span>
-<span id="cb41-109"><a href="#cb41-109" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [153] xtable_1.8-4                jsonlite_1.8.2             </span></span>
-<span id="cb41-110"><a href="#cb41-110" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [155] R6_2.5.1                    Hmisc_4.7-1                </span></span>
-<span id="cb41-111"><a href="#cb41-111" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [157] pillar_1.8.1                htmltools_0.5.3            </span></span>
-<span id="cb41-112"><a href="#cb41-112" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [159] mime_0.12                   glue_1.6.2                 </span></span>
-<span id="cb41-113"><a href="#cb41-113" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [161] fastmap_1.1.0               olsrr_0.5.3                </span></span>
-<span id="cb41-114"><a href="#cb41-114" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [163] codetools_0.2-18            pkgbuild_1.3.1             </span></span>
-<span id="cb41-115"><a href="#cb41-115" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [165] utf8_1.2.2                  lattice_0.20-45            </span></span>
-<span id="cb41-116"><a href="#cb41-116" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [167] bslib_0.4.0                 spatstat.sparse_2.1-1      </span></span>
-<span id="cb41-117"><a href="#cb41-117" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [169] tibble_3.1.8                curl_4.3.3                 </span></span>
-<span id="cb41-118"><a href="#cb41-118" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [171] leiden_0.4.3                interp_1.1-3               </span></span>
-<span id="cb41-119"><a href="#cb41-119" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [173] survival_3.3-1              rmarkdown_2.13             </span></span>
-<span id="cb41-120"><a href="#cb41-120" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [175] nbpMatching_1.5.1           munsell_0.5.0              </span></span>
-<span id="cb41-121"><a href="#cb41-121" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [177] GenomeInfoDbData_1.2.7      iterators_1.0.14           </span></span>
-<span id="cb41-122"><a href="#cb41-122" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [179] reshape2_1.4.4              gtable_0.3.1               </span></span>
-<span id="cb41-123"><a href="#cb41-123" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [181] spatstat.core_2.4-4</span></span></code></pre></div>
+<span id="cb41-69"><a href="#cb41-69" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  [73] BiocFileCache_2.2.1         polyclip_1.10-0            </span></span>
+<span id="cb41-70"><a href="#cb41-70" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  [75] matrixStats_0.62.0          lmtest_0.9-40              </span></span>
+<span id="cb41-71"><a href="#cb41-71" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  [77] Matrix_1.5-1                carData_3.0-5              </span></span>
+<span id="cb41-72"><a href="#cb41-72" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  [79] zoo_1.8-11                  base64enc_0.1-3            </span></span>
+<span id="cb41-73"><a href="#cb41-73" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  [81] ggridges_0.5.4              processx_3.7.0             </span></span>
+<span id="cb41-74"><a href="#cb41-74" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  [83] png_0.1-7                   viridisLite_0.4.1          </span></span>
+<span id="cb41-75"><a href="#cb41-75" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  [85] rjson_0.2.21                bitops_1.0-7               </span></span>
+<span id="cb41-76"><a href="#cb41-76" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  [87] KernSmooth_2.23-20          blob_1.2.2                 </span></span>
+<span id="cb41-77"><a href="#cb41-77" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  [89] shape_1.4.6                 stringr_1.4.1              </span></span>
+<span id="cb41-78"><a href="#cb41-78" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  [91] parallelly_1.32.1           spatstat.random_2.2-0      </span></span>
+<span id="cb41-79"><a href="#cb41-79" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  [93] jpeg_0.1-9                  scales_1.2.1               </span></span>
+<span id="cb41-80"><a href="#cb41-80" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  [95] memoise_2.0.1               magrittr_2.0.3             </span></span>
+<span id="cb41-81"><a href="#cb41-81" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  [97] plyr_1.8.7                  ica_1.0-3                  </span></span>
+<span id="cb41-82"><a href="#cb41-82" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  [99] zlibbioc_1.40.0             compiler_4.1.3             </span></span>
+<span id="cb41-83"><a href="#cb41-83" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [101] BiocIO_1.4.0                RColorBrewer_1.1-3         </span></span>
+<span id="cb41-84"><a href="#cb41-84" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [103] fitdistrplus_1.1-8          Rsamtools_2.10.0           </span></span>
+<span id="cb41-85"><a href="#cb41-85" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [105] cli_3.4.1                   listenv_0.8.0              </span></span>
+<span id="cb41-86"><a href="#cb41-86" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [107] pbapply_1.5-0               ps_1.7.1                   </span></span>
+<span id="cb41-87"><a href="#cb41-87" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [109] htmlTable_2.4.1             Formula_1.2-4              </span></span>
+<span id="cb41-88"><a href="#cb41-88" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [111] MASS_7.3-56                 mgcv_1.8-40                </span></span>
+<span id="cb41-89"><a href="#cb41-89" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [113] tidyselect_1.1.2            stringi_1.7.8              </span></span>
+<span id="cb41-90"><a href="#cb41-90" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [115] highr_0.9                   yaml_2.3.5                 </span></span>
+<span id="cb41-91"><a href="#cb41-91" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [117] latticeExtra_0.6-30         ggrepel_0.9.1              </span></span>
+<span id="cb41-92"><a href="#cb41-92" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [119] grid_4.1.3                  sass_0.4.2                 </span></span>
+<span id="cb41-93"><a href="#cb41-93" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [121] fastmatch_1.1-3             tools_4.1.3                </span></span>
+<span id="cb41-94"><a href="#cb41-94" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [123] future.apply_1.9.1          parallel_4.1.3             </span></span>
+<span id="cb41-95"><a href="#cb41-95" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [125] rstudioapi_0.14             foreach_1.5.2              </span></span>
+<span id="cb41-96"><a href="#cb41-96" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [127] foreign_0.8-82              gridExtra_2.3              </span></span>
+<span id="cb41-97"><a href="#cb41-97" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [129] farver_2.1.1                Rtsne_0.16                 </span></span>
+<span id="cb41-98"><a href="#cb41-98" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [131] digest_0.6.29               rgeos_0.5-9                </span></span>
+<span id="cb41-99"><a href="#cb41-99" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [133] FNN_1.1.3.1                 shiny_1.7.2                </span></span>
+<span id="cb41-100"><a href="#cb41-100" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [135] nortest_1.0-4               Rcpp_1.0.9                 </span></span>
+<span id="cb41-101"><a href="#cb41-101" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [137] car_3.1-0                   later_1.3.0                </span></span>
+<span id="cb41-102"><a href="#cb41-102" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [139] RcppAnnoy_0.0.19            httr_1.4.4                 </span></span>
+<span id="cb41-103"><a href="#cb41-103" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [141] colorspace_2.0-3            XML_3.99-0.9               </span></span>
+<span id="cb41-104"><a href="#cb41-104" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [143] fs_1.5.2                    tensor_1.5                 </span></span>
+<span id="cb41-105"><a href="#cb41-105" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [145] reticulate_1.26             splines_4.1.3              </span></span>
+<span id="cb41-106"><a href="#cb41-106" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [147] uwot_0.1.14                 RcppRoll_0.3.0             </span></span>
+<span id="cb41-107"><a href="#cb41-107" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [149] spatstat.utils_2.3-1        plotly_4.10.0              </span></span>
+<span id="cb41-108"><a href="#cb41-108" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [151] sessioninfo_1.2.2           xtable_1.8-4               </span></span>
+<span id="cb41-109"><a href="#cb41-109" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [153] jsonlite_1.8.2              R6_2.5.1                   </span></span>
+<span id="cb41-110"><a href="#cb41-110" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [155] Hmisc_4.7-1                 pillar_1.8.1               </span></span>
+<span id="cb41-111"><a href="#cb41-111" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [157] htmltools_0.5.3             mime_0.12                  </span></span>
+<span id="cb41-112"><a href="#cb41-112" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [159] glue_1.6.2                  fastmap_1.1.0              </span></span>
+<span id="cb41-113"><a href="#cb41-113" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [161] olsrr_0.5.3                 codetools_0.2-18           </span></span>
+<span id="cb41-114"><a href="#cb41-114" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [163] pkgbuild_1.3.1              utf8_1.2.2                 </span></span>
+<span id="cb41-115"><a href="#cb41-115" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [165] lattice_0.20-45             bslib_0.4.0                </span></span>
+<span id="cb41-116"><a href="#cb41-116" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [167] spatstat.sparse_2.1-1       tibble_3.1.8               </span></span>
+<span id="cb41-117"><a href="#cb41-117" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [169] curl_4.3.3                  leiden_0.4.3               </span></span>
+<span id="cb41-118"><a href="#cb41-118" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [171] interp_1.1-3                survival_3.3-1             </span></span>
+<span id="cb41-119"><a href="#cb41-119" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [173] rmarkdown_2.13              nbpMatching_1.5.1          </span></span>
+<span id="cb41-120"><a href="#cb41-120" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [175] munsell_0.5.0               GenomeInfoDbData_1.2.7     </span></span>
+<span id="cb41-121"><a href="#cb41-121" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [177] iterators_1.0.14            reshape2_1.4.4             </span></span>
+<span id="cb41-122"><a href="#cb41-122" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [179] gtable_0.3.1                spatstat.core_2.4-4</span></span></code></pre></div>
 </div>
 
 

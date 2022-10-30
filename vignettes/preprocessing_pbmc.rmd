@@ -115,12 +115,9 @@ required for model fitting (see above). Note the following points.
 * We only keep motifs when genes encoding corresponding TFs are present in the
 RNA-seq data.
 * We ensure that the same set of genes is included in all objects. 
-* To change the TF symbols to gene symbols, use `convert = FALSE` for human data 
-and `convert = TRUE` for mouse data.
 
 ```{r, eval = TRUE, message = FALSE, warning = FALSE}
-tripod.pbmc <- getObjectsForModelFit(object = pbmc, chr = paste0("chr", 1:22), 
-	convert = FALSE)
+tripod.pbmc <- getObjectsForModelFit(object = pbmc, chr = paste0("chr", 1:22))
 ```
 
 Individual objects can be extracted using the following code.
