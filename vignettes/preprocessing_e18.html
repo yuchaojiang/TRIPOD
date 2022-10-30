@@ -11,7 +11,7 @@
 
 <meta name="author" content="Yuchao Jiang, Yuriko Harigaya, Nancy R. Zhang" />
 
-<meta name="date" content="2022-10-07" />
+<meta name="date" content="2022-10-29" />
 
 <title>Data preprocessing for TRIPOD - 10x Genomics mouse embryonic brain</title>
 
@@ -454,7 +454,7 @@ pre code {
 <h1 class="title toc-ignore">Data preprocessing for TRIPOD - 10x
 Genomics mouse embryonic brain</h1>
 <h4 class="author">Yuchao Jiang, Yuriko Harigaya, Nancy R. Zhang</h4>
-<h4 class="date">2022-10-07</h4>
+<h4 class="date">2022-10-29</h4>
 
 </div>
 
@@ -567,7 +567,7 @@ must be in the same directory.</p>
 <span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">counts =</span> atac.counts, <span class="at">sep =</span> <span class="fu">c</span>(<span class="st">&quot;:&quot;</span>, <span class="st">&quot;-&quot;</span>),</span>
 <span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">genome =</span> <span class="st">&quot;mm10&quot;</span>, <span class="at">fragments =</span> <span class="st">&quot;e18_mouse_brain_fresh_5k_atac_fragments.tsv.gz&quot;</span>,</span>
 <span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">min.cells =</span> <span class="dv">10</span>, <span class="at">annotation =</span> annotations</span>
-<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>); <span class="fu">rm</span>(path)</span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>)</span>
 <span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>e18[[<span class="st">&quot;ATAC&quot;</span>]] <span class="ot">&lt;-</span> chrom.assay</span></code></pre></div>
 </div>
 <div id="adding-cell-type-annotations-optional" class="section level2">
@@ -721,14 +721,14 @@ Alternatively, the <code>species</code> argument can be set to
 <span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">opts =</span> <span class="fu">list</span>(<span class="at">species =</span> <span class="dv">9606</span>, <span class="at">all_versions =</span> <span class="cn">FALSE</span>)) <span class="co"># human</span></span></code></pre></div>
 <p>In some cases, the TF motif information may not fully incorporate the
 existing knowledge in the literature. For example, in our analysis of
-the mouse embryonic brain data, we replace the motif for the Olig2 TF
+the mouse embryonic brain data, we replace the motif for the OLIG2 TF
 with <code>CAGCTG</code>, which has been validated by previous genetic
 and biochemical studies <span class="citation">(Küspert et al.
 2011)</span>.</p>
-<p>For this purpose, we first construct a PFM of the Olig2 motif.</p>
-<div class="sourceCode" id="cb19"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>pfm.olig2 <span class="ot">&lt;-</span> <span class="fu">PFMatrix</span>(</span>
-<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>    <span class="at">ID =</span> <span class="st">&quot;PFM.Olig2&quot;</span>,</span>
-<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">name =</span> <span class="st">&quot;Olig2&quot;</span>,</span>
+<p>For this purpose, we first construct a PFM of the OLIG2 motif.</p>
+<div class="sourceCode" id="cb19"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>PFM.OLIG2 <span class="ot">&lt;-</span> <span class="fu">PFMatrix</span>(</span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>    <span class="at">ID =</span> <span class="st">&quot;PFM.OLIG2&quot;</span>,</span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">name =</span> <span class="st">&quot;OLIG2&quot;</span>,</span>
 <span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">strand =</span> <span class="st">&quot;+&quot;</span>,</span>
 <span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">bg =</span> <span class="fu">c</span>(<span class="at">A =</span> <span class="fl">0.25</span>, <span class="at">C =</span> <span class="fl">0.25</span>, <span class="at">G =</span> <span class="fl">0.25</span>, <span class="at">T =</span> <span class="fl">0.25</span>),</span>
 <span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">tags =</span> <span class="fu">list</span>(</span>
@@ -742,10 +742,10 @@ and biochemical studies <span class="citation">(Küspert et al.
 <span id="cb19-14"><a href="#cb19-14" aria-hidden="true" tabindex="-1"></a>        <span class="at">byrow =</span> <span class="cn">TRUE</span>, <span class="at">nrow =</span> <span class="dv">4</span>,</span>
 <span id="cb19-15"><a href="#cb19-15" aria-hidden="true" tabindex="-1"></a>        <span class="at">dimnames=</span><span class="fu">list</span>(<span class="fu">c</span>(<span class="st">&quot;A&quot;</span>, <span class="st">&quot;C&quot;</span>, <span class="st">&quot;G&quot;</span>, <span class="st">&quot;T&quot;</span>)))</span>
 <span id="cb19-16"><a href="#cb19-16" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div>
-<p>The following code removes the original PFM of the Olig2 motif from
+<p>The following code removes the original PFM of the OLIG2 motif from
 the PFM set and adds the custom PFM.</p>
 <div class="sourceCode" id="cb20"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>pfm.set <span class="ot">&lt;-</span> pfm.set[<span class="sc">-</span><span class="fu">which</span>(<span class="fu">sapply</span>(pfm.set, <span class="cf">function</span>(x) x<span class="sc">@</span>name <span class="sc">==</span> <span class="st">&quot;OLIG2&quot;</span>))]</span>
-<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>pfm.set<span class="sc">$</span>PFM.Olig2 <span class="ot">&lt;-</span> pfm.olig2</span></code></pre></div>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>pfm.set<span class="sc">$</span>PFM.OLIG2 <span class="ot">&lt;-</span> PFM.OLIG2</span></code></pre></div>
 <p>The following code creates a motif matrix.</p>
 <div class="sourceCode" id="cb21"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>motif.matrix <span class="ot">&lt;-</span> <span class="fu">CreateMotifMatrix</span>(</span>
 <span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">features =</span> <span class="fu">granges</span>(e18),</span>
@@ -782,8 +782,7 @@ present in a given ATAC peak region.</p>
 object containing the four elements. The function keeps motifs only when
 genes encoding corresponding TFs are present in the RNA-seq data and
 ensures that the same set of genes is included in all objects.</p>
-<div class="sourceCode" id="cb23"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>tripod.e18 <span class="ot">&lt;-</span> <span class="fu">getObjectsForModelFit</span>(<span class="at">object =</span> e18, <span class="at">chr =</span> <span class="fu">paste0</span>(<span class="st">&quot;chr&quot;</span>, <span class="dv">1</span><span class="sc">:</span><span class="dv">19</span>), </span>
-<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>    <span class="at">convert =</span> <span class="cn">TRUE</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb23"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>tripod.e18 <span class="ot">&lt;-</span> <span class="fu">getObjectsForModelFit</span>(<span class="at">object =</span> e18, <span class="at">chr =</span> <span class="fu">paste0</span>(<span class="st">&quot;chr&quot;</span>, <span class="dv">1</span><span class="sc">:</span><span class="dv">19</span>))</span></code></pre></div>
 <p>Individual objects can be extracted using the following code.</p>
 <div class="sourceCode" id="cb24"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>transcripts.gr <span class="ot">&lt;-</span> tripod.e18<span class="sc">$</span>transcripts.gr</span>
 <span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>peaks.gr <span class="ot">&lt;-</span> tripod.e18<span class="sc">$</span>peaks.gr</span>
@@ -994,7 +993,7 @@ vignette for the 10x Genomics mouse embryonic brain data</a>.</p>
 <span id="cb38-69"><a href="#cb38-69" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  [69] pkgconfig_2.0.3             nlme_3.1-157               </span></span>
 <span id="cb38-70"><a href="#cb38-70" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  [71] ProtGenerics_1.26.0         nnet_7.3-17                </span></span>
 <span id="cb38-71"><a href="#cb38-71" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  [73] rlang_1.0.6                 globals_0.16.1             </span></span>
-<span id="cb38-72"><a href="#cb38-72" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  [75] lifecycle_1.0.2             miniUI_0.1.1.1             </span></span>
+<span id="cb38-72"><a href="#cb38-72" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  [75] lifecycle_1.0.3             miniUI_0.1.1.1             </span></span>
 <span id="cb38-73"><a href="#cb38-73" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  [77] filelock_1.0.2              BiocFileCache_2.2.1        </span></span>
 <span id="cb38-74"><a href="#cb38-74" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  [79] dichromat_2.0-0             polyclip_1.10-0            </span></span>
 <span id="cb38-75"><a href="#cb38-75" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  [81] matrixStats_0.62.0          lmtest_0.9-40              </span></span>
