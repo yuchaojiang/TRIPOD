@@ -604,11 +604,12 @@ delta.coeff.pval <- deleteNeighbor(Yg = Yg, Xt = Xt, Yj = Yj,
 
 The following code visualizes the sampling $p$-values on a UMAP plot.
 
-```{r, eval = TRUE, fig.width = 5, fig.height = 5, fig.align = "center"}
-plotFeatureForNeighbor(delta.coeff.pval = delta.coeff.pval, 
+```{r, eval = TRUE, fig.width = 9, fig.height = 4, fig.align = "center"}
+p1=plotFeatureForNeighbor(delta.coeff.pval = delta.coeff.pval, 
                             object = pbmc, reduction = reduction, label = FALSE)
-DimPlot(pbmc, reduction = reduction, group.by = "celltype", 
+p2=DimPlot(pbmc, reduction = reduction, group.by = "celltype", 
               label = TRUE, label.size = 2.5, repel = TRUE) + ggtitle("Cell type")
+p1+p2 + plot_layout(ncol = 2) & NoLegend()
 ```
 
 # Session information

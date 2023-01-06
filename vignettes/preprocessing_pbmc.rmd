@@ -65,7 +65,6 @@ library(motifmatchr)
 # 3 Preprocessing
 ## 3.1 Creating and processing a Seurat object
 
-We first create and process a Seurat object essentially according to the tutorial [here](https://satijalab.org/seurat/articles/weighted_nearest_neighbor_analysis.html). 
 The input data can be downlowded from below.
 
 ```{sh, eval=FALSE}
@@ -74,18 +73,183 @@ wget https://cf.10xgenomics.com/samples/cell-arc/1.0.0/pbmc_granulocyte_sorted_1
 wget https://cf.10xgenomics.com/samples/cell-arc/1.0.0/pbmc_granulocyte_sorted_10k/pbmc_granulocyte_sorted_10k_atac_fragments.tsv.gz.tbi
 ```
 
-We obtain cell type labels according to the tutorial
-[here](https://satijalab.org/seurat/articles/multimodal_reference_mapping.html).
-The input CITE-seq data can be downloaded from below.
+We first create and process a Seurat object essentially according to the tutorial [here](https://satijalab.org/seurat/articles/weighted_nearest_neighbor_analysis.html). 
 
-```{sh, eval=FALSE}
-wget https://atlas.fredhutch.org/data/nygc/multimodal/pbmc_multimodal.h5seurat
+```{r, eval=TRUE, warning=FALSE,  cache = FALSE, message = FALSE, fig.width = 9, fig.height = 4, fig.align = "center"}
+inputdata.10x <- Read10X_h5("pbmc_granulocyte_sorted_10k_filtered_feature_bc_matrix.h5")
+rna_counts <- inputdata.10x$`Gene Expression`
+atac_counts <- inputdata.10x$Peaks
+
+pbmc <- CreateSeuratObject(counts = rna_counts)
+pbmc[["percent.mt"]] <- PercentageFeatureSet(pbmc, pattern = "^MT-")
+
+grange.counts <- StringToGRanges(rownames(atac_counts), sep = c(":", "-"))
+grange.use <- seqnames(grange.counts) %in% standardChromosomes(grange.counts)
+atac_counts <- atac_counts[as.vector(grange.use), ]
+annotations <- GetGRangesFromEnsDb(ensdb = EnsDb.Hsapiens.v86)
+seqlevelsStyle(annotations) <- 'UCSC'
+genome(annotations) <- "hg38"
+
+frag.file <- "pbmc_granulocyte_sorted_10k_atac_fragments.tsv.gz"
+chrom_assay <- CreateChromatinAssay(
+  counts = atac_counts,
+  sep = c(":", "-"),
+  genome = 'hg38',
+  fragments = frag.file,
+  min.cells = 10,
+  annotation = annotations
+)
+pbmc[["ATAC"]] <- chrom_assay
+
+pbmc <- subset(x = pbmc,
+    subset = nCount_ATAC < 7e4 &
+    nCount_ATAC > 5e3 &
+    nCount_RNA < 25000 &
+    nCount_RNA > 1000 &
+    percent.mt < 20)
+
+DefaultAssay(pbmc) <- "RNA"
+pbmc <- SCTransform(pbmc, verbose = FALSE) %>% RunPCA(verbose = FALSE) %>% 
+  RunUMAP(dims = 1:50, reduction.name = 'umap.rna', reduction.key = 'rnaUMAP_',
+          verbose = FALSE)
+
+DefaultAssay(pbmc) <- "ATAC"
+pbmc <- RunTFIDF(pbmc)
+pbmc <- FindTopFeatures(pbmc, min.cutoff = 'q0')
+pbmc <- RunSVD(pbmc)
+pbmc <- RunUMAP(pbmc, reduction = 'lsi', dims = 2:50, reduction.name = "umap.atac", 
+                reduction.key = "atacUMAP_")
+
+pbmc <- FindMultiModalNeighbors(pbmc, reduction.list = list("pca", "lsi"), dims.list = list(1:50, 2:50))
+pbmc <- RunUMAP(pbmc, nn.name = "weighted.nn", reduction.name = "wnn.umap", reduction.key = "wnnUMAP_")
+pbmc <- FindClusters(pbmc, graph.name = "wsnn", algorithm = 3, verbose = FALSE)
+
+# Run chromVAR to generate the motif deviation scores
+DefaultAssay(pbmc) <- "ATAC"
+pwm_set <- getMatrixSet(x = JASPAR2020, opts = list(species = 9606, all_versions = FALSE))
+motif.matrix <- CreateMotifMatrix(features = granges(pbmc), pwm = pwm_set, genome = 'hg38', use.counts = FALSE)
+motif.object <- CreateMotifObject(data = motif.matrix, pwm = pwm_set)
+
+pbmc <- SetAssayData(pbmc, assay = 'ATAC', slot = 'motifs', new.data = motif.object)
+
+pbmc <- RunChromVAR(
+  object = pbmc,
+  genome = BSgenome.Hsapiens.UCSC.hg38
+)
 ```
 
-In this vignette, we start with a processed Seurat object (`pbmc.chomvar.annotated.rds`),
-which can be downloaded
-[here](https://www.dropbox.com/s/e4jbbmnhtq8kusq/pbmc.chromvar.annotated.rds?dl=0).
-The script used to generate this file is available [here](https://github.com/yuchaojiang/TRIPOD/blob/main/vignettes/PBMC_multiomic_chromVAR.R).
+We obtain cell type labels according to the tutorial
+[here](https://satijalab.org/seurat/articles/multimodal_reference_mapping.html).
+The input CITE-seq data can be downloaded from [here](https://atlas.fredhutch.org/data/nygc/multimodal/pbmc_multimodal.h5seurat).
+
+```{r, eval=TRUE, warning=FALSE,  cache = FALSE, message = FALSE, fig.width = 9, fig.height = 4, fig.align = "center"}
+reference <- LoadH5Seurat("pbmc_multimodal.h5seurat")
+
+p1=DimPlot(object = reference, 
+           reduction = "wnn.umap",
+           group.by = "celltype.l1", 
+           label = TRUE, 
+           label.size = 3, 
+           repel = TRUE) + NoLegend() + ggtitle("CITE-seq celltype l1")
+p2=DimPlot(object = reference, 
+           reduction = "wnn.umap",
+           group.by = "celltype.l2", 
+           label = TRUE, 
+           label.size = 3, 
+           repel = TRUE) + NoLegend() + ggtitle("CITE-seq celltype l2")
+p1+p2
+
+# Find anchors between reference and query
+# using a precomputed supervised PCA (spca) transformation for this example. 
+DefaultAssay(pbmc) <- "SCT"
+anchors <- FindTransferAnchors(
+  reference = reference,
+  query = pbmc,
+  normalization.method = "SCT",
+  reference.reduction = "spca",
+  dims = 1:50,
+  recompute.residuals = FALSE
+)
+
+# Transfer cell type labels and protein data from the reference to the query
+# project the query data onto the umap structure of the reference
+pbmc <- MapQuery(
+  anchorset = anchors,
+  query = pbmc,
+  reference = reference,
+  refdata = list(
+    celltype.l1 = "celltype.l1",
+    celltype.l2 = "celltype.l2",
+    predicted_ADT = "ADT"
+  ),
+  reference.reduction = "spca", 
+  reduction.model = "wnn.umap"
+)
+
+pbmc$celltype=as.factor(pbmc$predicted.celltype.l2)
+
+# Remove some minor cell types (with less than 100 cells)
+pbmc$celltype[pbmc$celltype=='cDC2']='cDC'
+pbmc=pbmc[,!pbmc$celltype%in%names(which(table(pbmc$celltype)<100))]
+pbmc$celltype=droplevels(pbmc$celltype)
+
+# Renormalize after QC
+DefaultAssay(pbmc) <- "RNA"
+pbmc <- SCTransform(pbmc, verbose = FALSE) %>% RunPCA(verbose = FALSE) %>% 
+  RunUMAP(dims = 1:50, reduction.name = 'umap.rna', reduction.key = 'rnaUMAP_', verbose = FALSE)
+
+DefaultAssay(pbmc) <- "ATAC"
+pbmc <- RunTFIDF(pbmc)
+pbmc <- FindTopFeatures(pbmc, min.cutoff = 'q0')
+pbmc <- RunSVD(pbmc)
+pbmc <- RunUMAP(pbmc, reduction = 'lsi', dims = 2:50, reduction.name = "umap.atac", reduction.key = "atacUMAP_")
+
+pbmc <- FindMultiModalNeighbors(pbmc, reduction.list = list("pca", "lsi"), dims.list = list(1:50, 2:50))
+pbmc <- RunUMAP(pbmc, nn.name = "weighted.nn", reduction.name = "wnn.umap", reduction.key = "wnnUMAP_")
+pbmc <- FindClusters(pbmc, graph.name = "wsnn", algorithm = 3, verbose = FALSE)
+
+# For each cluster, we only keep the main cell type
+cell.keep=rep(FALSE, ncol(pbmc))
+temp=table(pbmc$seurat_clusters, pbmc$celltype)
+for(i in 1:nrow(temp)){
+  clusteri=as.numeric(rownames(temp)[i])
+  celltypei=colnames(temp)[which.max(temp[i,])]
+  cell.keep[which(pbmc$seurat_clusters==clusteri & pbmc$celltype==celltypei)]=TRUE
+}
+pbmc=pbmc[,cell.keep]
+
+# Renormalize after QC
+DefaultAssay(pbmc) <- "RNA"
+pbmc <- SCTransform(pbmc, verbose = FALSE) %>% RunPCA(verbose = FALSE) %>% 
+  RunUMAP(dims = 1:50, reduction.name = 'umap.rna', reduction.key = 'rnaUMAP_', 
+          verbose = FALSE)
+
+DefaultAssay(pbmc) <- "ATAC"
+pbmc <- RunTFIDF(pbmc)
+pbmc <- FindTopFeatures(pbmc, min.cutoff = 'q0')
+pbmc <- RunSVD(pbmc)
+pbmc <- RunUMAP(pbmc, reduction = 'lsi', dims = 2:50, reduction.name = "umap.atac", reduction.key = "atacUMAP_")
+
+pbmc <- FindMultiModalNeighbors(pbmc, reduction.list = list("pca", "lsi"), dims.list = list(1:50, 2:50))
+pbmc <- RunUMAP(pbmc, nn.name = "weighted.nn", reduction.name = "wnn.umap", reduction.key = "wnnUMAP_")
+pbmc <- FindClusters(pbmc, graph.name = "wsnn", algorithm = 3, verbose = FALSE)
+
+p1 <- DimPlot(pbmc, reduction = "umap.rna", group.by = "predicted.celltype.l1", 
+              label = TRUE, label.size = 3, repel = TRUE) + ggtitle("RNA")
+p2 <- DimPlot(pbmc, reduction = "umap.atac", group.by = "predicted.celltype.l1", 
+              label = TRUE, label.size = 3, repel = TRUE) + ggtitle("ATAC")
+p3 <- DimPlot(pbmc, reduction = "wnn.umap", group.by = "predicted.celltype.l1", 
+              label = TRUE, label.size = 3, repel = TRUE) + ggtitle("WNN")
+p1 + p2 + p3 & NoLegend() & theme(plot.title = element_text(hjust = 0.5))
+
+p1 <- DimPlot(pbmc, reduction = "umap.rna", group.by = "predicted.celltype.l2", 
+              label = TRUE, label.size = 3, repel = TRUE) + ggtitle("RNA")
+p2 <- DimPlot(pbmc, reduction = "umap.atac", group.by = "predicted.celltype.l2", 
+              label = TRUE, label.size = 3, repel = TRUE) + ggtitle("ATAC")
+p3 <- DimPlot(pbmc, reduction = "wnn.umap", group.by = "predicted.celltype.l2", 
+              label = TRUE, label.size = 3, repel = TRUE) + ggtitle("WNN")
+p1 + p2 + p3 & NoLegend() & theme(plot.title = element_text(hjust = 0.5))
+```
 
 ## 3.2 Creating objects required for model fitting
 
@@ -94,23 +258,7 @@ information that is necessary for model fitting,
 namely, `transcripts.gr`, `peaks.gr`, `motifxTF`, and `peakxmotif`,
 using the `getObjectsForModelFit()` function. 
 See the documentation of the function for descriptions of these objects.
-
-```{r, include = FALSE, eval = TRUE, message = FALSE, warning = FALSE}
-pbmc <- readRDS("pbmc.chromvar.annotated.rds")
-```
-
-The following code loads the preprocessed Seurat object.
-`"/path/to/your/dir"` needs to be replaced with
-the path to the directory where `pbmc.chomvar.rds` exists.
-
-```{r, eval = FALSE}
-file <- "pbmc.chromvar.annotated.rds"
-path <- file.path("path/to/your/dir", file)
-pbmc <- readRDS(path); rm(path)
-```
-
-We then create a list object containing the four elements
-required for model fitting (see above). Note the following points.
+Note the following points.
 
 * We only keep motifs when genes encoding corresponding TFs are present in the
 RNA-seq data.
@@ -288,7 +436,6 @@ save(pbmc.metacell.celltype, file='pbmc.metacell.celltype.rda')
 pbmc.metacell.celltype.col=metacell.celltype.col
 save(pbmc.metacell.celltype.col, file='pbmc.metacell.celltype.col.rda')
 ```
-
 
 # Session information
 
