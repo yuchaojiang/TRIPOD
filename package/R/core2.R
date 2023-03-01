@@ -32,7 +32,9 @@ getXYMatrices2 <- function(gene.name,
                            ext.upstream,
                            ext.downstream = NULL,
                            tripod,
-                           metacell) {
+                           metacell,
+			   metacell.celltype = NULL,
+			   metacell.celltype.col = NULL) {
     transcripts.gr <- tripod$transcripts.gr
     peaks.gr <- tripod$peaks.gr
     motif.TF.map <- tripod$motif.TF.map
@@ -102,7 +104,12 @@ getXYMatrices2 <- function(gene.name,
         Yg = Yg,
         Xp = Xp,
         Yt = Yt,
-        peak.motif.TF.g = peak.motif.TF.g)
+        peak.motif.TF.g = peak.motif.TF.g,
+	nonzero.peakxmotif.g = nonzero.peakxmotif.g,
+	TF.g = TF.g,
+	peaks.gr.g = peaks.gr.g,
+    	metacell.celltype = metacell.celltype,
+  	metacell.celltype.col = metacell.celltype.col)
 
     results
 }
