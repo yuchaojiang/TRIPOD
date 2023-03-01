@@ -84,14 +84,14 @@ getXYMatrices <- function(gene.name, ext.upstream, ext.downstream = NULL,
   	gene.name = gene.name,
   	ext.upstream = ext.upstream,
   	ext.downstream = ext.downstream,
-    Yg = Yg,
+    	Yg = Yg,
   	Xt = Xt,
   	Yj = Yj,
-    peakxmotif.g = peakxmotif.g,
+    	peakxmotif.g = peakxmotif.g,
   	nonzero.peakxmotif.g = nonzero.peakxmotif.g,
-    TF.g = TF.g,
+    	TF.g = TF.g,
   	peaks.gr.g = peaks.gr.g,
-    metacell.celltype = metacell.celltype,
+    	metacell.celltype = metacell.celltype,
   	metacell.celltype.col = metacell.celltype.col
   )
   return(results)
